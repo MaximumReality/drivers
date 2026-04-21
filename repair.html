@@ -901,13 +901,15 @@ window.confirmAvatar = async function () {
   try {
     alert("set clicked");
 
-    if (!window.selectedAvatarFile || !window.currentUserId) {
+    if (!selectedAvatarFile || !currentUserId) {
+
       alert("missing file or user");
       return;
     }
 
-    const file = window.selectedAvatarFile;
-    const uid = window.currentUserId;
+    const file = selectedAvatarFile;
+const uid = currentUserId;
+
 
     const storageRef = ref(storage, `avatars/${uid}.jpg`);
 
