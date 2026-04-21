@@ -564,16 +564,23 @@
     currentUserName = name;
 
     // Show app immediately
-    document.getElementById('login').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-    setStatus(true);
+    const loginEl = document.getElementById('login');
+const appEl = document.getElementById('app');
+
+loginEl.style.display = 'none';
+appEl.style.display = 'block';
+
+// force repaint
+setTimeout(() => {
+  appEl.scrollTop = 0;
+}, 50);
 
     // Start listeners immediately
     startMessageListener();
     startJobsListener();
     startDriversListener();
     startTypingListener();
-
+  
     alert("ABOUT TO WRITE FIRESTORE");
   
     // Write profile in background - non-blocking
