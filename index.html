@@ -3,8 +3,6 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>DriverLink</title>
-  <link rel="icon" href="favicon.png">
-
 
 <style>
   :root {
@@ -551,18 +549,21 @@
     document.getElementById('app').classList.remove('hidden');
     setStatus(true);
 
-    // Create / update driver profile
-    await setDoc(doc(driversRef, currentUserId), {
-      name: currentUserName,
-      online: true,
-      lastSeen: serverTimestamp()
-    }, { merge: true });
+    // Create / update driver profile (non-blocking)
+    try {
+      await setDoc(doc(driversRef, currentUserId), {
+        name: currentUserName,
+        online: true,
+        lastSeen: serverTimestamp()
+      }, { merge: true });
 
-    // Presence
-    await setDoc(doc(presenceRef, currentUserId), {
-      online: true,
-      lastSeen: serverTimestamp()
-    }, { merge: true });
+      await setDoc(doc(presenceRef, currentUserId), {
+        online: true,
+        lastSeen: serverTimestamp()
+      }, { merge: true });
+    } catch (e) {
+      console.warn('Presence write failed:', e);
+    }
 
     // Listen to data
     startMessageListener();
