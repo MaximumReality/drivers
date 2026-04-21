@@ -559,6 +559,7 @@
     }
 
     currentUserId = userCredential.user.uid;
+    alert("LOGIN SUCCESS. UID = " + currentUserId);
     currentUserName = name;
 
     // Show app immediately
@@ -572,6 +573,8 @@
     startDriversListener();
     startTypingListener();
 
+    alert("ABOUT TO WRITE FIRESTORE");
+  
     // Write profile in background - non-blocking
     try {
       await setDoc(doc(driversRef, currentUserId), {
@@ -584,10 +587,14 @@
         online: true,
         lastSeen: serverTimestamp()
       }, { merge: true });
-    } catch(e) {
-  alert("LOGIN FAILED: " + e.message);
+    } 
+      catch(e) {
+  alert("FIRESTORE FAILED: " + e.message);
   console.error(e);
 }
+  //alert("LOGIN FAILED: " + e.message);
+  //console.error(e);
+//}
 
     // Handle offline
     window.addEventListener('beforeunload', async () => {
