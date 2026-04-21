@@ -585,25 +585,28 @@
         lastSeen: serverTimestamp()
       }, { merge: true });
     } catch(e) {
-      console.warn('Profile write failed:', e);
-    }
+  alert("LOGIN FAILED: " + e.message);
+  console.error(e);
+}
 
     // Handle offline
     window.addEventListener('beforeunload', async () => {
-      try {
-        await updateDoc(doc(presenceRef, currentUserId), {
-          online: false,
-          lastSeen: serverTimestamp()
-        });
-        await updateDoc(doc(driversRef, currentUserId), {
-          online: false,
-          lastSeen: serverTimestamp()
-        });
-      } catch (e) {
-        // ignore
-      }
-    });
+  try {
+    await setDoc(doc(presenceRef, currentUserId), {
+      online: false,
+      lastSeen: serverTimestamp()
+    }, { merge: true });
+
+    await setDoc(doc(driversRef, currentUserId), {
+      online: false,
+      lastSeen: serverTimestamp()
+    }, { merge: true });
+
+  } catch (e) {
+    // optional: you can log this if debugging
+    console.log("Offline update failed:", e);
   }
+});
 
   // TABS
   function showTab(tab, el) {
