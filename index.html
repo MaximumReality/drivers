@@ -229,10 +229,8 @@ html, body {
   DriverLink <span id="status"></span>
 </div>
 
-  <div class="tabs">
-    <div class="tab activeTab" onclick="showTab('chat')">Chat</div>
-    <div class="tab" onclick="showTab('jobs')">Jobs</div>
-  </div>
+  <div class="tab activeTab" onclick="showTab('chat', this)">Chat</div>
+<div class="tab" onclick="showTab('jobs', this)">Jobs</div>
 
   <!-- CHAT -->
   <div id="chat">
@@ -246,9 +244,9 @@ html, body {
 
   <!-- JOBS -->
   <div id="jobsTab" class="hidden">
-    <button style="margin:10px; padding:10px; border:none; border-radius:10px; background:#25D366;">
-      + Post Job
-    </button>
+    <button onclick="postJob()" style="margin:10px; padding:10px; border:none; border-radius:10px; background:#25D366;">
+  + Post Job
+</button>
 
     <div id="jobs"></div>
   </div>
@@ -336,27 +334,19 @@ window.login = function () {
 
   loadMessages();
   loadJobs();
+  updateStatusUI();
 };
 
-  // Make functions global so your HTML buttons still work
+ 
 
-window.login = function () {
-  username = document.getElementById("name").value;
+  window.showTab = function(tab, el) {
+  document.getElementById("chat").classList.toggle("hidden", tab !== "chat");
+  document.getElementById("jobsTab").classList.toggle("hidden", tab !== "jobs");
 
-  document.getElementById("login").style.display = "none";
-  document.getElementById("app").classList.remove("hidden");
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("activeTab"));
 
-  loadMessages();
-  loadJobs();
+  if (el) el.classList.add("activeTab");
 };
-
-  window.showTab = function (tab) {
-
-    document.getElementById("chat").classList.toggle("hidden", tab !== "chat");
-
-    document.getElementById("jobsTab").classList.toggle("hidden", tab !== "jobs");
-
-  };
 
   // 💬 SEND MESSAGE
 
@@ -490,12 +480,16 @@ window.login = function () {
     isOnline
       ? '<span class="statusDot online"></span>Online'
       : '<span class="statusDot offline"></span>Offline';
-}
-  let isOnline = true;
+}let isOnline = true;
 
-setInterval(() => {
-  isOnline = !isOnline;
-}, 30000); // placeholder toggle for now
+function updateStatusUI() {
+  document.getElementById("status").innerHTML =
+    isOnline
+      ? '<span class="statusDot online"></span>Online'
+      : '<span class="statusDot offline"></span>Offline';
+}
+
+
   
 setInterval(updateStatusUI, 2000);
 
