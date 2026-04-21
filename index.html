@@ -482,7 +482,7 @@
 
 <script type="module">
   // Firebase v9+ modular imports from CDN
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
     getFirestore,
     collection,
@@ -518,17 +518,7 @@
     
   };
 
-  // Init Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
-  const auth = getAuth(app);
-  // App Check debug token
-  self.FIREBASE_APPCHECK_DEBUG_TOKEN = '1C62E8CF-5010-44FD-BEA9-F238C7D9BD92';
-  const appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider('debug'),
-    isTokenAutoRefreshEnabled: true
-  });
+
 
   // Collections
   const messagesRef = collection(db, "messages");
