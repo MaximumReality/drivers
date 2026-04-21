@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
   <title>Driver Network</title>
 <style>
   body {
@@ -21,14 +22,32 @@
 
   /* LOGIN SCREEN */
   #login {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100vh;
-    padding: 20px;
-    background: linear-gradient(180deg, #0f1419, #111b21);
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0f1419;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+}
 
+  
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* 🔒 locks outer page scrolling */
+  touch-action: manipulation;
+}
+  #chat, #jobsTab {
+  height: calc(100vh - 140px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+  
   #login input {
     padding: 14px;
     margin-top: 10px;
@@ -175,6 +194,19 @@
 .offline {
   background: #ff4d4d;
 }
+
+  .avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #25D366;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  font-weight: bold;
+  color: #000;
+}
 </style>
 
 </head>
@@ -193,6 +225,7 @@
 <div id="app" class="hidden">
 
   <div class="header">
+  <span id="avatar" class="avatar"></span>
   DriverLink <span id="status"></span>
 </div>
 
@@ -292,21 +325,30 @@
 
   let username = "";
 
+window.login = function () {
+  username = document.getElementById("name").value;
+
+  document.getElementById("avatar").innerText =
+    username.charAt(0).toUpperCase();
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").classList.remove("hidden");
+
+  loadMessages();
+  loadJobs();
+};
+
   // Make functions global so your HTML buttons still work
 
-  window.login = function () {
+window.login = function () {
+  username = document.getElementById("name").value;
 
-    username = document.getElementById("name").value;
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").classList.remove("hidden");
 
-    document.getElementById("login").classList.add("hidden");
-
-    document.getElementById("app").classList.remove("hidden");
-
-    loadMessages();
-
-    loadJobs();
-
-  };
+  loadMessages();
+  loadJobs();
+};
 
   window.showTab = function (tab) {
 
