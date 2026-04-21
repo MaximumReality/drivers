@@ -2,76 +2,116 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
-  <title>Driver Network</title>
+  <title>DriverLink</title>
+
 <style>
-  body {
-    margin: 0;
-    font-family: system-ui, -apple-system, Arial;
-    background: #0f1419;
-    color: #fff;
+  :root {
+    --bg: #0b141a;
+    --panel: #111b21;
+    --panel-light: #1f2c34;
+    --accent: #25D366;
+    --accent-dark: #128C7E;
+    --text: #e9edef;
+    --text-dim: #8696a0;
   }
 
-  /* HEADER BAR */
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, Arial;
+    overflow: hidden;
+  }
+
+  .hidden { display: none; }
+
+  /* HEADER */
   .header {
-    background: #128C7E;
+    background: var(--accent-dark);
     padding: 14px;
     font-size: 18px;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 30;
   }
 
-  /* LOGIN SCREEN */
-  #login {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #0f1419;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 20px;
-  z-index: 9999;
-}
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-weight: bold;
+  }
 
-  
-html, body {
-  height: 100%;
-  margin: 0;
-  overflow: hidden; /* 🔒 locks outer page scrolling */
-  touch-action: manipulation;
-}
-  #chat, #jobsTab {
-  height: calc(100vh - 140px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-  
+  #status {
+    margin-left: auto;
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  .statusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+
+  .online { background: var(--accent); }
+  .offline { background: #ff4d4d; }
+
+  /* LOGIN */
+  #login {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 30px;
+    z-index: 9999;
+    text-align: center;
+  }
+
   #login input {
     padding: 14px;
-    margin-top: 10px;
+    margin-top: 12px;
     border-radius: 10px;
     border: none;
     font-size: 16px;
+    width: 100%;
   }
 
   #login button {
-    margin-top: 10px;
+    margin-top: 12px;
     padding: 14px;
     border: none;
     border-radius: 10px;
-    background: #128C7E;
+    background: var(--accent-dark);
     color: white;
     font-size: 16px;
+    width: 100%;
   }
 
-  /* APP LAYOUT */
-  .hidden { display: none; }
-
+  /* TABS */
   .tabs {
     display: flex;
-    background: #1f2c34;
+    background: var(--panel);
+    position: fixed;
+    top: 58px;
+    width: 100%;
+    z-index: 25;
   }
 
   .tab {
@@ -79,140 +119,281 @@ html, body {
     text-align: center;
     padding: 12px;
     cursor: pointer;
-    color: #aaa;
+    color: var(--text-dim);
+    font-weight: 500;
   }
 
   .activeTab {
-    color: #25D366;
-    border-bottom: 2px solid #25D366;
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
   }
 
-  /* CHAT + JOBS */
-  #messages, #jobs {
-    height: calc(100vh - 140px);
+  /* PANELS */
+  #chat, #jobsTab, #driversTab {
+    position: absolute;
+    top: 110px;
+    bottom: 60px;
+    left: 0;
+    right: 0;
     overflow-y: auto;
-    padding: 10px;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px;
   }
 
-  .msg {
-    margin: 8px 0;
-    padding: 8px 10px;
-    background: #1f2c34;
-    border-radius: 10px;
+  /* CHAT */
+  #messages {
+    padding-bottom: 8px;
   }
 
-  .msg b {
-    color: #25D366;
+  .bubble {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 14px;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    font-size: 15px;
+    position: relative;
+    display: inline-block;
   }
 
+  .bubble.me {
+    background: var(--accent);
+    color: #000;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+    display: block;
+  }
+
+  .bubble.them {
+    background: var(--panel-light);
+    border-bottom-left-radius: 4px;
+    display: block;
+  }
+
+  .bubble .name {
+    font-weight: bold;
+    color: var(--accent);
+    margin-bottom: 2px;
+    font-size: 13px;
+  }
+
+  .bubble .meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  .bubble .meta span {
+    margin-left: 4px;
+  }
+
+  .typingIndicator {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* INPUT BAR */
   .inputBar {
-    display: flex;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: var(--panel);
     padding: 10px;
-    background: #1f2c34;
+    display: flex;
+    z-index: 30;
   }
 
   .inputBar input {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
     border-radius: 20px;
     border: none;
+    font-size: 15px;
   }
 
   .inputBar button {
-    margin-left: 8px;
-    background: #25D366;
+    margin-left: 10px;
+    background: var(--accent);
     border: none;
-    padding: 10px 14px;
+    padding: 10px 16px;
     border-radius: 20px;
     color: #000;
     font-weight: bold;
   }
 
-  .card {
-    background: #1f2c34;
-    padding: 12px;
-    margin: 10px;
-    border-radius: 12px;
+  /* JOBS */
+  .jobCard {
+    background: var(--panel-light);
+    margin: 10px 0;
+    padding: 14px;
+    border-radius: 14px;
+    border-left: 4px solid var(--accent);
+    transition: 0.15s ease;
   }
 
-  .card button {
+  .jobCard:active {
+    transform: scale(0.97);
+  }
+
+  .jobRoute {
+    font-size: 17px;
+    font-weight: bold;
+  }
+
+  .jobMeta {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+
+  .jobStatus {
+    margin-top: 6px;
+    font-size: 13px;
+  }
+
+  .jobHint {
     margin-top: 8px;
-    background: #25D366;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 10px;
+    font-size: 11px;
+    opacity: 0.5;
   }
- 
-.jobCard {
-  background: #1f2c34;
-  margin: 10px;
-  padding: 14px;
-  border-radius: 14px;
-  transition: 0.15s ease;
-  border-left: 4px solid #25D366;
-}
 
-.jobCard:active {
-  transform: scale(0.98);
-}
+  .jobActions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
 
-.jobRoute {
-  font-size: 16px;
-  font-weight: bold;
-}
+  .jobBtn {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
 
-.jobMeta {
-  font-size: 13px;
-  opacity: 0.7;
-  margin-top: 4px;
-}
+  .jobBtn.primary {
+    background: var(--accent);
+    color: #000;
+  }
 
-.jobStatus {
-  margin-top: 6px;
-  font-size: 13px;
-}
+  .jobBtn.secondary {
+    background: #202c33;
+    color: var(--text);
+  }
 
-.jobHint {
-  margin-top: 8px;
-  font-size: 11px;
-  opacity: 0.5;
-}
+  .postJobBtn {
+    margin: 10px 0;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #000;
+    font-weight: bold;
+    width: 100%;
+  }
 
-/* ONLINE / OFFLINE INDICATOR */
-.statusDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 6px;
-}
+  /* DRIVERS */
+  .driverCard {
+    background: var(--panel-light);
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
 
-.online {
-  background: #25D366;
-}
+  .driverAvatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 14px;
+  }
 
-.offline {
-  background: #ff4d4d;
-}
+  .driverInfo {
+    flex: 1;
+  }
 
-  .avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #25D366;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 8px;
-  font-weight: bold;
-  color: #000;
-}
+  .driverName {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .driverStatus {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* PROFILE MODAL */
+  #profileModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .profileCard {
+    background: var(--panel-light);
+    padding: 20px;
+    border-radius: 14px;
+    width: 80%;
+    max-width: 320px;
+    text-align: center;
+  }
+
+  .profileAvatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 26px;
+    font-weight: bold;
+  }
+
+  .profileName {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .profileMeta {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .profileClose {
+    margin-top: 10px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #000;
+    font-weight: 500;
+  }
 </style>
-
 </head>
 <body>
 
-  
 <!-- LOGIN -->
 <div id="login">
   <h2 style="color:#25D366;">DriverLink</h2>
@@ -225,105 +406,93 @@ html, body {
 <div id="app" class="hidden">
 
   <div class="header">
-  <span id="avatar" class="avatar"></span>
-  DriverLink <span id="status"></span>
-</div>
+    <span id="avatar" class="avatar"></span>
+    DriverLink
+    <span id="status"></span>
+  </div>
 
-  <div class="tab activeTab" onclick="showTab('chat', this)">Chat</div>
-<div class="tab" onclick="showTab('jobs', this)">Jobs</div>
+  <div class="tabs">
+    <div class="tab activeTab" onclick="showTab('chat', this)">Chat</div>
+    <div class="tab" onclick="showTab('jobs', this)">Jobs</div>
+    <div class="tab" onclick="showTab('drivers', this)">Drivers</div>
+  </div>
 
   <!-- CHAT -->
   <div id="chat">
     <div id="messages"></div>
-
-    <div class="inputBar">
-      <input id="msgInput" placeholder="Message drivers...">
-      <button onclick="sendMessage()">Send</button>
-    </div>
+    <div id="typing" class="typingIndicator hidden"></div>
   </div>
 
   <!-- JOBS -->
   <div id="jobsTab" class="hidden">
-    <button onclick="postJob()" style="margin:10px; padding:10px; border:none; border-radius:10px; background:#25D366;">
-  + Post Job
-</button>
-
+    <button class="postJobBtn" onclick="postJob()">+ Post Job</button>
     <div id="jobs"></div>
   </div>
 
+  <!-- DRIVERS -->
+  <div id="driversTab" class="hidden">
+    <div id="drivers"></div>
+  </div>
+
+  <!-- INPUT BAR -->
+  <div class="inputBar">
+    <input id="msgInput" placeholder="Message drivers..." oninput="onTyping()">
+    <button onclick="sendMessage()">Send</button>
+  </div>
 </div>
 
+<!-- PROFILE MODAL -->
+<div id="profileModal">
+  <div class="profileCard">
+    <div class="profileAvatar" id="profileAvatar"></div>
+    <div class="profileName" id="profileName"></div>
+    <div class="profileMeta" id="profileMeta"></div>
+    <button class="profileClose" onclick="closeProfile()">Close</button>
+  </div>
 </div>
 
-<!-- FIREBASE (MODERN MODULAR VERSION) -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  updateDoc,
+  doc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-<script type="module"> console.log("DriverLink script loaded");
+import {
+  getAuth,
+  signInAnonymously
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDhvNqHgKH5auAOCPUm4wZITa_3N5Ctnvc",
+  authDomain: "driverlink-app.firebaseapp.com",
+  projectId: "driverlink-app",
+  storageBucket: "driverlink-app.firebasestorage.app",
+  messagingSenderId: "360444468582",
+  appId: "1:360444468582:web:0af78a95d0dfe104e9fca7"
+};
 
-  import {
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-    getFirestore,
+await signInAnonymously(auth);
 
-    collection,
+let username = "";
+let lastSender = null;
+let typingTimeout = null;
+let isOnline = true;
+let myPresenceDocId = null;
 
-    addDoc,
-
-    onSnapshot,
-
-    query,
-
-    orderBy,
-
-    updateDoc,
-
-    doc
-
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  import {
-
-    getAuth,
-
-    signInAnonymously
-
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-  // 🔑 YOUR FIREBASE CONFIG (KEEP YOURS)
-
-  const firebaseConfig = {
-
-    apiKey: "AIzaSyDhvNqHgKH5auAOCPUm4wZITa_3N5Ctnvc",
-
-    authDomain: "driverlink-app.firebaseapp.com",
-
-    projectId: "driverlink-app",
-
-    storageBucket: "driverlink-app.firebasestorage.app",
-
-    messagingSenderId: "360444468582",
-
-    appId: "1:360444468582:web:0af78a95d0dfe104e9fca7"
-
-  };
-
-  // INIT
-
-  const app = initializeApp(firebaseConfig);
-
-  const db = getFirestore(app);
-
-  const auth = getAuth(app);
-
-  // 🔓 Anonymous login
-
-  await signInAnonymously(auth);
-
-  // 👤 TEMP USERNAME (since login screen still exists)
-
-  let username = "";
-
-window.login = function () {
+// LOGIN
+window.login = async function () {
   const input = document.getElementById("name");
   username = input.value.trim();
 
@@ -338,126 +507,208 @@ window.login = function () {
   document.getElementById("login").style.display = "none";
   document.getElementById("app").classList.remove("hidden");
 
+  await initPresence();
   loadMessages();
   loadJobs();
+  loadDrivers();
   updateStatusUI();
 };
 
- 
+// PRESENCE
+async function initPresence() {
+  const presRef = await addDoc(collection(db, "presence"), {
+    name: username,
+    online: true,
+    typing: false,
+    lastSeen: serverTimestamp()
+  });
+  myPresenceDocId = presRef.id;
 
-  
-
-  // 💬 SEND MESSAGE
-
-  window.sendMessage = async function () {
-
-    const text = document.getElementById("msgInput").value;
-
-    await addDoc(collection(db, "messages"), {
-
-      name: username || "Driver",
-
-      text: text,
-
-      time: Date.now()
-
-    });
-
-    document.getElementById("msgInput").value = "";
-
-  };
-
-  // 📡 LOAD MESSAGES
-
-  function loadMessages() {
-
-    const q = query(collection(db, "messages"), orderBy("time"));
-
-    onSnapshot(q, (snapshot) => {
-
-      let html = "";
-
-      snapshot.forEach((docSnap) => {
-
-        const m = docSnap.data();
-
-        html += `<div><b>${m.name}:</b> ${m.text}</div>`;
-
+  window.addEventListener("beforeunload", async () => {
+    try {
+      await updateDoc(doc(db, "presence", myPresenceDocId), {
+        online: false,
+        typing: false,
+        lastSeen: serverTimestamp()
       });
+    } catch (e) {}
+  });
+}
 
-      document.getElementById("messages").innerHTML = html;
+// SEND MESSAGE
+window.sendMessage = async function () {
+  const input = document.getElementById("msgInput");
+  const text = input.value.trim();
+  if (!text) return;
 
+  await addDoc(collection(db, "messages"), {
+    name: username,
+    text,
+    time: serverTimestamp(),
+    delivered: true,
+    seen: false
+  });
+
+  input.value = "";
+  setTyping(false);
+};
+
+// TYPING
+window.onTyping = function () {
+  setTyping(true);
+  if (typingTimeout) clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => setTyping(false), 2000);
+};
+
+async function setTyping(isTyping) {
+  if (!myPresenceDocId) return;
+  try {
+    await updateDoc(doc(db, "presence", myPresenceDocId), {
+      typing: isTyping,
+      lastSeen: serverTimestamp()
+    });
+  } catch (e) {}
+}
+
+// LOAD MESSAGES
+function loadMessages() {
+  const q = query(collection(db, "messages"), orderBy("time"));
+
+  onSnapshot(q, async (snapshot) => {
+    const container = document.getElementById("messages");
+    container.innerHTML = "";
+    lastSender = null;
+
+    const docs = [];
+    snapshot.forEach(d => docs.push(d));
+
+    // Mark all as seen (group-style)
+    for (const d of docs) {
+      const m = d.data();
+      if (!m.seen) {
+        try {
+          await updateDoc(doc(db, "messages", d.id), { seen: true });
+        } catch (e) {}
+      }
+    }
+
+    docs.forEach((docSnap) => {
+      const m = docSnap.data();
+      const isMe = m.name === username;
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + (isMe ? "me" : "them");
+
+      if (!isMe && lastSender !== m.name) {
+        const name = document.createElement("div");
+        name.className = "name";
+        name.innerText = m.name;
+        name.onclick = () => openProfile(m.name);
+        bubble.appendChild(name);
+      }
+
+      const textNode = document.createElement("div");
+      textNode.innerText = m.text;
+      bubble.appendChild(textNode);
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+
+      const timeStr = m.time?.toDate
+        ? m.time.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        : "";
+
+      const timeSpan = document.createElement("span");
+      timeSpan.innerText = timeStr;
+      meta.appendChild(timeSpan);
+
+      if (isMe) {
+        const statusSpan = document.createElement("span");
+        if (m.seen) {
+          statusSpan.innerText = "✓✓";
+        } else if (m.delivered) {
+          statusSpan.innerText = "✓";
+        }
+        meta.appendChild(statusSpan);
+      }
+
+      bubble.appendChild(meta);
+      container.appendChild(bubble);
+
+      lastSender = m.name;
     });
 
-  }
+    container.scrollTop = container.scrollHeight;
+  });
+}
 
-  // 🚗 POST JOB
+// JOBS
+window.postJob = async function () {
+  let from = prompt("Pickup location:");
+  if (!from) return;
 
-  window.postJob = async function () {
+  let to = prompt("Dropoff location:");
+  if (!to) return;
 
-    let from = prompt("From:");
+  let time = prompt("Time:");
+  if (!time) return;
 
-    let to = prompt("To:");
-
-    let time = prompt("Time:");
-
-    await addDoc(collection(db, "jobs"), {
-
-      from,
-
-      to,
-
-      time,
-
-      postedBy: username || "Driver",
-
-      takenBy: null
-
-    });
-
-  };
-
-  // ✋ TAKE JOB
-
-  window.takeJob = async function (id) {
-  await updateDoc(doc(db, "jobs", id), {
-    takenBy: username
+  await addDoc(collection(db, "jobs"), {
+    from,
+    to,
+    time,
+    postedBy: username,
+    takenBy: null,
+    status: "available" // available, claimed, on_route, completed
   });
 };
 
+window.claimJob = async function (id) {
+  const confirmTake = confirm("Claim this job?");
+  if (!confirmTake) return;
 
+  await updateDoc(doc(db, "jobs", id), {
+    takenBy: username,
+    status: "claimed"
+  });
+};
 
-  // 📡 LOAD JOBS
+window.markOnRoute = async function (id) {
+  await updateDoc(doc(db, "jobs", id), {
+    status: "on_route"
+  });
+};
 
-  function loadJobs() {
+window.markCompleted = async function (id) {
+  await updateDoc(doc(db, "jobs", id), {
+    status: "completed"
+  });
+};
+
+function statusLabel(j) {
+  if (j.status === "completed") return "✅ Completed";
+  if (j.status === "on_route") return "🟡 On route";
+  if (j.status === "claimed") return `🔴 Claimed by ${j.takenBy}`;
+  return "🟢 Available";
+}
+
+function loadJobs() {
   onSnapshot(collection(db, "jobs"), (snapshot) => {
     let html = "";
 
     snapshot.forEach((docSnap) => {
       let j = docSnap.data();
 
-      const status = j.takenBy
-        ? `🔴 Taken by ${j.takenBy}`
-        : `🟢 Available`;
-
-      const time = j.time ? `🕒 ${j.time}` : "";
-
       html += `
-        <div class="jobCard" onclick="takeJob('${docSnap.id}')">
-          <div class="jobRoute">
-            🚗 ${j.from} → ${j.to}
-          </div>
-
-          <div class="jobMeta">
-            ${time}
-          </div>
-
-          <div class="jobStatus">
-            ${status}
-          </div>
-
-          <div class="jobHint">
-            Tap to claim
+        <div class="jobCard">
+          <div class="jobRoute">🚗 ${j.from} → ${j.to}</div>
+          <div class="jobMeta">🕒 ${j.time}</div>
+          <div class="jobStatus">${statusLabel(j)}</div>
+          <div class="jobHint">Posted by ${j.postedBy}</div>
+          <div class="jobActions">
+            ${j.status === "available" ? `<button class="jobBtn primary" onclick="claimJob('${docSnap.id}')">Claim</button>` : ""}
+            ${j.status === "claimed" && j.takenBy === username ? `<button class="jobBtn secondary" onclick="markOnRoute('${docSnap.id}')">On Route</button>` : ""}
+            ${j.status === "on_route" && j.takenBy === username ? `<button class="jobBtn secondary" onclick="markCompleted('${docSnap.id}')">Complete</button>` : ""}
           </div>
         </div>
       `;
@@ -466,17 +717,93 @@ window.login = function () {
     document.getElementById("jobs").innerHTML = html;
   });
 }
-  window.showTab = function(tab, el) {
+
+// DRIVERS + TYPING
+function loadDrivers() {
+  onSnapshot(collection(db, "presence"), (snapshot) => {
+    const driversEl = document.getElementById("drivers");
+    const typingEl = document.getElementById("typing");
+    driversEl.innerHTML = "";
+
+    let typingNames = [];
+
+    snapshot.forEach((docSnap) => {
+      const p = docSnap.data();
+      const isMe = p.name === username;
+
+      const card = document.createElement("div");
+      card.className = "driverCard";
+      card.onclick = () => openProfile(p.name);
+
+      const avatar = document.createElement("div");
+      avatar.className = "driverAvatar";
+      avatar.innerText = p.name?.charAt(0)?.toUpperCase() || "?";
+
+      const info = document.createElement("div");
+      info.className = "driverInfo";
+
+      const name = document.createElement("div");
+      name.className = "driverName";
+      name.innerText = p.name + (isMe ? " (You)" : "");
+
+      const status = document.createElement("div");
+      status.className = "driverStatus";
+      status.innerText = p.online ? "Online" : "Offline";
+
+      info.appendChild(name);
+      info.appendChild(status);
+
+      card.appendChild(avatar);
+      card.appendChild(info);
+      driversEl.appendChild(card);
+
+      if (p.typing && !isMe) {
+        typingNames.push(p.name);
+      }
+    });
+
+    if (typingNames.length > 0) {
+      typingEl.classList.remove("hidden");
+      typingEl.innerText =
+        typingNames.length === 1
+          ? `${typingNames[0]} is typing...`
+          : `${typingNames.join(", ")} are typing...`;
+    } else {
+      typingEl.classList.add("hidden");
+      typingEl.innerText = "";
+    }
+  });
+}
+
+// PROFILE MODAL
+window.openProfile = function (name) {
+  const modal = document.getElementById("profileModal");
+  const avatar = document.getElementById("profileAvatar");
+  const pname = document.getElementById("profileName");
+  const meta = document.getElementById("profileMeta");
+
+  avatar.innerText = name.charAt(0).toUpperCase();
+  pname.innerText = name;
+  meta.innerText = "Driver in the network • Real-time presence enabled";
+
+  modal.style.display = "flex";
+};
+
+window.closeProfile = function () {
+  document.getElementById("profileModal").style.display = "none";
+};
+
+// TABS
+window.showTab = function (tab, el) {
   document.getElementById("chat").classList.toggle("hidden", tab !== "chat");
   document.getElementById("jobsTab").classList.toggle("hidden", tab !== "jobs");
+  document.getElementById("driversTab").classList.toggle("hidden", tab !== "drivers");
 
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("activeTab"));
-
   if (el) el.classList.add("activeTab");
 };
 
-let isOnline = true;
-
+// STATUS
 function updateStatusUI() {
   document.getElementById("status").innerHTML =
     isOnline
@@ -484,9 +811,7 @@ function updateStatusUI() {
       : '<span class="statusDot offline"></span>Offline';
 }
 
-setInterval(updateStatusUI, 2000);
-
+setInterval(updateStatusUI, 5000);
 </script>
-
 </body>
 </html>
