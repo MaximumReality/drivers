@@ -505,16 +505,17 @@
     getAuth,
     signInAnonymously
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js";
 
   // Your Firebase config
   const firebaseConfig = {
-    apiKey: "AIzaSyDhvNqHgKH5auAOCPUm4wZITa_3N5Ctnvc",
-    authDomain: "driverlink-app.firebaseapp.com",
-    projectId: "driverlink-app",
-    storageBucket: "driverlink-app.firebasestorage.app",
-    messagingSenderId: "360444468582",
-    appId: "1:360444468582:web:0af78a95d0dfe104e9fca7",
-    measurementId: "G-MW6956PD0W"
+    apiKey: "AIzaSyB6zx5__XRT6R6UnR3EhVjZAx6I8VkIqHM",
+    authDomain: "driver-uplink.firebaseapp.com",
+    projectId: "driver-uplink",
+    storageBucket: "driver-uplink.firebasestorage.app",
+    messagingSenderId: "156011169296",
+    appId: "1:156011169296:web:ed175cf12158e09e14ec95",
+    
   };
 
   // Init Firebase
@@ -522,6 +523,12 @@
   const db = getFirestore(app);
   const storage = getStorage(app);
   const auth = getAuth(app);
+  // App Check debug token
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = '1C62E8CF-5010-44FD-BEA9-F238C7D9BD92';
+  const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('debug'),
+    isTokenAutoRefreshEnabled: true
+  });
 
   // Collections
   const messagesRef = collection(db, "messages");
