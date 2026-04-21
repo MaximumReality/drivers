@@ -464,7 +464,7 @@
 
   <!-- INPUT BAR -->
   <div class="inputBar">
-    <div class="attachBtn" onclick="attachPhoto()">📸</div>
+    <div class="attachBtn" onclick="attachPhoto()">📎</div>
     <input id="msgInput" placeholder="Message drivers..." oninput="onTyping()">
     <button onclick="sendMessage()">Send</button>
   </div>
@@ -617,7 +617,8 @@ setTimeout(() => {
       }
     });
   }
-
+let selectedAvatarFile = null;
+let selectedAvatarURL = null;
   // TABS
   function showTab(tab, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('activeTab'));
@@ -716,50 +717,57 @@ setTimeout(() => {
   }
 
   // CAMERA ATTACH + UPLOAD
-  async function attachPhoto() {
+function attachPhoto() {
   if (!currentUserId) return;
 
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.capture = 'environment';
 
-  input.onchange = async (e) => {
+  input.onchange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    try {
-      const path = `photos/${currentUserId}/${Date.now()}_${file.name}`;
-      const storageRef = ref(storage, path);
+    selectedAvatarFile = file;
 
-      console.log("📤 Upload starting:", path);
+    const reader = new FileReader();
+    reader.onload = () => {
+      selectedAvatarURL = reader.result;
 
-      await uploadBytes(storageRef, file);
+      document.getElementById('previewImg').src = selectedAvatarURL;
+      document.getElementById('avatarPreview').classList.remove('hidden');
+    };
 
-      console.log("✅ Upload finished");
-
-      const url = await getDownloadURL(storageRef);
-
-      console.log("🔗 Download URL:", url);
-
-      await addDoc(messagesRef, {
-        text: '',
-        senderId: currentUserId,
-        senderName: currentUserName || 'Driver',
-        type: 'photo',
-        photoURL: url,
-        timestamp: serverTimestamp()
-      });
-
-      console.log("📨 Message saved");
-
-    } catch (err) {
-      console.error("❌ PHOTO UPLOAD FAILED:", err);
-      alert("Upload failed: " + err.message);
-    }
+    reader.readAsDataURL(file);
   };
 
   input.click();
+}
+  function cancelPreview() {
+  selectedAvatarFile = null;
+  selectedAvatarURL = null;
+  document.getElementById('avatarPreview').classList.add('hidden');
+}
+
+async function confirmAvatar() {
+  if (!selectedAvatarFile || !currentUserId) return;
+
+  const storageRef = ref(storage, `avatars/${currentUserId}.jpg`);
+  await uploadBytes(storageRef, selectedAvatarFile);
+  const url = await getDownloadURL(storageRef);
+
+  await updateDoc(doc(driversRef, currentUserId), {
+    avatarURL: url
+  });
+
+  // instant UI update
+  document.querySelectorAll('.driverAvatar').forEach(el => {
+    if (el.dataset?.uid === currentUserId) {
+      el.innerHTML = `<img src="${url}" style="width:100%;height:100%;border-radius:50%;">`;
+    }
+  });
+
+  cancelPreview();
 }
 
   // JOBS
@@ -826,8 +834,14 @@ setTimeout(() => {
         card.className = 'driverCard';
 
         const avatar = document.createElement('div');
-        avatar.className = 'driverAvatar';
-        avatar.innerText = (data.name || 'D')[0].toUpperCase();
+avatar.className = 'driverAvatar';
+avatar.dataset.uid = docSnap.id;
+
+if (data.avatarURL) {
+  avatar.innerHTML = `<img src="${data.avatarURL}" style="width:100%;height:100%;border-radius:50%;">`;
+} else {
+  avatar.innerText = (data.name || 'D')[0].toUpperCase();
+}
 
         const info = document.createElement('div');
         info.className = 'driverInfo';
@@ -872,7 +886,58 @@ setTimeout(() => {
   window.attachPhoto = attachPhoto;
   window.postJob = postJob;
   window.closeProfile = closeProfile;
+  window.cancelPreview = cancelPreview;
+window.confirmAvatar = confirmAvatar;
 </script>
+<div id="avatarPreview" class="hidden">
+  <div style="
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.7);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+  ">
+    <div style="
+      background:white;
+      padding:20px;
+      border-radius:16px;
+      text-align:center;
+      width:80%;
+      max-width:300px;
+    ">
+      <div style="font-weight:bold;margin-bottom:10px;">Set Avatar</div>
 
+      <img id="previewImg" style="
+        width:140px;
+        height:140px;
+        border-radius:50%;
+        object-fit:cover;
+        margin:10px auto;
+        display:block;
+      ">
+
+      <div style="display:flex;gap:10px;margin-top:15px;">
+        <button onclick="cancelPreview()" style="
+          flex:1;
+          padding:10px;
+          border:none;
+          border-radius:10px;
+          background:#ddd;
+        ">Cancel</button>
+
+        <button onclick="confirmAvatar()" style="
+          flex:1;
+          padding:10px;
+          border:none;
+          border-radius:10px;
+          background:#128C7E;
+          color:white;
+        ">Set</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
