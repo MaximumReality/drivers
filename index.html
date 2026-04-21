@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -416,10 +417,12 @@
     font-weight: 500;
   }
 </style>
+
 </head>
 <body>
 
 <!-- LOGIN -->
+
 <div id="login">
   <img src="icon.PNG">
   <h2 style="color:#128C7E;">DriverLink</h2>
@@ -429,6 +432,7 @@
 </div>
 
 <!-- APP -->
+
 <div id="app" class="hidden">
 
   <div class="header">
@@ -446,23 +450,27 @@
   </div>
 
   <!-- CHAT -->
+
   <div id="chat">
     <div id="messages"></div>
     <div id="typing" class="typingIndicator hidden"></div>
   </div>
 
   <!-- JOBS -->
+
   <div id="jobsTab" class="hidden">
     <button class="postJobBtn" onclick="postJob()">+ Post Job</button>
     <div id="jobs"></div>
   </div>
 
   <!-- DRIVERS -->
+
   <div id="driversTab" class="hidden">
     <div id="drivers"></div>
   </div>
 
   <!-- INPUT BAR -->
+
   <div class="inputBar">
     <div class="attachBtn" onclick="attachPhoto()">📸</div>
     <input id="msgInput" placeholder="Message drivers..." oninput="onTyping()">
@@ -471,6 +479,7 @@
 </div>
 
 <!-- PROFILE MODAL -->
+
 <div id="profileModal">
   <div class="profileCard">
     <div class="profileAvatar" id="profileAvatar"></div>
@@ -501,6 +510,10 @@
     uploadBytes,
     getDownloadURL
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import {
+    getAuth,
+    signInAnonymously
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   // Your Firebase config
   const firebaseConfig = {
@@ -517,6 +530,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const storage = getStorage(app);
+  const auth = getAuth(app);
 
   // Collections
   const messagesRef = collection(db, "messages");
