@@ -505,6 +505,7 @@
     getAuth,
     signInAnonymously
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js";
 
   // Your Firebase config
   const firebaseConfig = {
@@ -513,10 +514,21 @@
     projectId: "driver-uplink",
     storageBucket: "driver-uplink.firebasestorage.app",
     messagingSenderId: "156011169296",
-    appId: "1:156011169296:web:ed175cf12158e09e14ec95"
+    appId: "1:156011169296:web:ed175cf12158e09e14ec95",
+    
   };
 
-
+  // Init Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+  const auth = getAuth(app);
+  // App Check debug token
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = '1C62E8CF-5010-44FD-BEA9-F238C7D9BD92';
+  const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('debug'),
+    isTokenAutoRefreshEnabled: true
+  });
 
   // Collections
   const messagesRef = collection(db, "messages");
@@ -563,28 +575,32 @@
     currentUserId = user.uid;
     currentUserName = name;
 
+    // Show app immediately
     document.getElementById('login').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     setStatus(true);
 
-    // Create / update driver profile
-    await setDoc(doc(driversRef, currentUserId), {
-      name: currentUserName,
-      online: true,
-      lastSeen: serverTimestamp()
-    }, { merge: true });
-
-    // Presence
-    await setDoc(doc(presenceRef, currentUserId), {
-      online: true,
-      lastSeen: serverTimestamp()
-    }, { merge: true });
-
-    // Listen to data
+    // Start listeners immediately
     startMessageListener();
     startJobsListener();
     startDriversListener();
     startTypingListener();
+
+    // Write profile in background - non-blocking
+    try {
+      await setDoc(doc(driversRef, currentUserId), {
+        name: currentUserName,
+        online: true,
+        lastSeen: serverTimestamp()
+      }, { merge: true });
+
+      await setDoc(doc(presenceRef, currentUserId), {
+        online: true,
+        lastSeen: serverTimestamp()
+      }, { merge: true });
+    } catch(e) {
+      console.warn('Profile write failed:', e);
+    }
 
     // Handle offline
     window.addEventListener('beforeunload', async () => {
