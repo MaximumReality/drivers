@@ -123,7 +123,60 @@
     padding: 8px 12px;
     border-radius: 10px;
   }
+ 
+.jobCard {
+  background: #1f2c34;
+  margin: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  transition: 0.15s ease;
+  border-left: 4px solid #25D366;
+}
+
+.jobCard:active {
+  transform: scale(0.98);
+}
+
+.jobRoute {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.jobMeta {
+  font-size: 13px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.jobStatus {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.jobHint {
+  margin-top: 8px;
+  font-size: 11px;
+  opacity: 0.5;
+}
+
+/* ONLINE / OFFLINE INDICATOR */
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.online {
+  background: #25D366;
+}
+
+.offline {
+  background: #ff4d4d;
+}
 </style>
+
 </head>
 <body>
 
@@ -139,7 +192,9 @@
 <!-- APP -->
 <div id="app" class="hidden">
 
-  <div class="header">DriverLink</div>
+  <div class="header">
+  DriverLink <span id="status"></span>
+</div>
 
   <div class="tabs">
     <div class="tab activeTab" onclick="showTab('chat')">Chat</div>
@@ -334,56 +389,52 @@
   // ✋ TAKE JOB
 
   window.takeJob = async function (id) {
+  await updateDoc(doc(db, "jobs", id), {
+    takenBy: username
+  });
+};
 
-    await updateDoc(doc(db, "jobs", id), {
 
-      takenBy: username
-
-    });
-
-  };
 
   // 📡 LOAD JOBS
 
   function loadJobs() {
+  onSnapshot(collection(db, "jobs"), (snapshot) => {
+    let html = "";
 
-    onSnapshot(collection(db, "jobs"), (snapshot) => {
+    snapshot.forEach((docSnap) => {
+      let j = docSnap.data();
 
-      let html = "";
+      const status = j.takenBy
+        ? `🔴 Taken by ${j.takenBy}`
+        : `🟢 Available`;
 
-      snapshot.forEach((docSnap) => {
+      const time = j.time ? `🕒 ${j.time}` : "";
 
-        let j = docSnap.data();
-
-        html += `
-
-          <div class="card">
-
-            <b>${j.from} → ${j.to}</b><br>
-
-            ${j.time}<br>
-
-            ${
-
-              j.takenBy
-
-                ? "Taken by " + j.takenBy
-
-                : `<button onclick="takeJob('${docSnap.id}')">TAKE</button>`
-
-            }
-
+      html += `
+        <div class="jobCard" onclick="takeJob('${docSnap.id}')">
+          <div class="jobRoute">
+            🚗 ${j.from} → ${j.to}
           </div>
 
-        `;
+          <div class="jobMeta">
+            ${time}
+          </div>
 
-      });
+          <div class="jobStatus">
+            ${status}
+          </div>
 
-      document.getElementById("jobs").innerHTML = html;
-
+          <div class="jobHint">
+            Tap to claim
+          </div>
+        </div>
+      `;
     });
 
-  }
+    document.getElementById("jobs").innerHTML = html;
+  });
+}
   window.showTab = function(tab) {
   document.getElementById("chat").classList.toggle("hidden", tab !== "chat");
   document.getElementById("jobsTab").classList.toggle("hidden", tab !== "jobs");
@@ -391,6 +442,20 @@
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("activeTab"));
   event.target.classList.add("activeTab");
 };
+
+  function updateStatusUI() {
+  document.getElementById("status").innerHTML =
+    isOnline
+      ? '<span class="statusDot online"></span>Online'
+      : '<span class="statusDot offline"></span>Offline';
+}
+  let isOnline = true;
+
+setInterval(() => {
+  isOnline = !isOnline;
+}, 30000); // placeholder toggle for now
+  
+setInterval(updateStatusUI, 2000);
 
 </script>
 
