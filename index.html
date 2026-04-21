@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Network</title>
+  <style>
+    body { font-family: Arial; margin:0; background:#111; color:#fff; }
+    .hidden { display:none; }
+    .tab { padding:10px; display:inline-block; cursor:pointer; }
+    .active { background:#333; }
+    #messages, #jobs { height:60vh; overflow:auto; padding:10px; }
+    input, button { padding:10px; margin:5px; }
+    .card { background:#222; padding:10px; margin:5px 0; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <h2>Enter Name</h2>
+  <input id="name" placeholder="Your name">
+  <button onclick="login()">Enter</button>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+  <!-- Tabs -->
+  <div>
+    <span class="tab active" onclick="showTab('chat')">Chat</span>
+    <span class="tab" onclick="showTab('jobs')">Jobs</span>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chat">
+    <div id="messages"></div>
+    <input id="msgInput" placeholder="Message">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <!-- JOBS -->
+  <div id="jobsTab" class="hidden">
+    <button onclick="postJob()">Post Job</button>
+    <div id="jobs"></div>
+  </div>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+<script>
+  // 🔑 PASTE YOUR FIREBASE CONFIG HERE
+  const firebaseConfig = {
+    apiKey: "YOUR_KEY",
+    authDomain: "YOUR_DOMAIN",
+    projectId: "YOUR_ID"
+  };
+
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  let username = "";
+
+  function login() {
+    username = document.getElementById("name").value;
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    loadMessages();
+    loadJobs();
+  }
+
+  function showTab(tab) {
+    document.getElementById("chat").classList.toggle("hidden", tab !== "chat");
+    document.getElementById("jobsTab").classList.toggle("hidden", tab !== "jobs");
+  }
+
+  // 💬 CHAT
+  function sendMessage() {
+    const text = document.getElementById("msgInput").value;
+    db.collection("messages").add({
+      name: username,
+      text: text,
+      time: Date.now()
+    });
+    document.getElementById("msgInput").value = "";
+  }
+
+  function loadMessages() {
+    db.collection("messages").orderBy("time")
+      .onSnapshot(snapshot => {
+        let html = "";
+        snapshot.forEach(doc => {
+          let m = doc.data();
+          html += `<div><b>${m.name}:</b> ${m.text}</div>`;
+        });
+        document.getElementById("messages").innerHTML = html;
+      });
+  }
+
+  // 🚗 JOBS
+  function postJob() {
+    let from = prompt("From:");
+    let to = prompt("To:");
+    let time = prompt("Time:");
+
+    db.collection("jobs").add({
+      from, to, time,
+      postedBy: username,
+      takenBy: null
+    });
+  }
+
+  function takeJob(id) {
+    db.collection("jobs").doc(id).update({
+      takenBy: username
+    });
+  }
+
+  function loadJobs() {
+    db.collection("jobs")
+      .onSnapshot(snapshot => {
+        let html = "";
+        snapshot.forEach(doc => {
+          let j = doc.data();
+          html += `
+            <div class="card">
+              <b>${j.from} → ${j.to}</b><br>
+              ${j.time}<br>
+              ${j.takenBy 
+                ? "Taken by " + j.takenBy 
+                : `<button onclick="takeJob('${doc.id}')">TAKE</button>`}
+            </div>
+          `;
+        });
+        document.getElementById("jobs").innerHTML = html;
+      });
+  }
+</script>
+
+</body>
+</html>
