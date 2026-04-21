@@ -837,10 +837,20 @@ async function confirmAvatar() {
 avatar.className = 'driverAvatar';
 avatar.dataset.uid = docSnap.id;
 
+const name = data.name || 'Driver';
+
 if (data.avatarURL) {
-  avatar.innerHTML = `<img src="${data.avatarURL}" style="width:100%;height:100%;border-radius:50%;">`;
+  const img = document.createElement('img');
+  img.src = data.avatarURL;
+  img.style.width = '100%';
+  img.style.height = '100%';
+  img.style.borderRadius = '50%';
+  img.style.objectFit = 'cover';
+
+  avatar.innerHTML = '';
+  avatar.appendChild(img);
 } else {
-  avatar.innerText = (data.name || 'D')[0].toUpperCase();
+  avatar.innerText = name[0].toUpperCase();
 }
 
         const info = document.createElement('div');
