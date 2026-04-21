@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -417,12 +416,10 @@
     font-weight: 500;
   }
 </style>
-
 </head>
 <body>
 
 <!-- LOGIN -->
-
 <div id="login">
   <img src="icon.PNG">
   <h2 style="color:#128C7E;">DriverLink</h2>
@@ -432,7 +429,6 @@
 </div>
 
 <!-- APP -->
-
 <div id="app" class="hidden">
 
   <div class="header">
@@ -450,27 +446,23 @@
   </div>
 
   <!-- CHAT -->
-
   <div id="chat">
     <div id="messages"></div>
     <div id="typing" class="typingIndicator hidden"></div>
   </div>
 
   <!-- JOBS -->
-
   <div id="jobsTab" class="hidden">
     <button class="postJobBtn" onclick="postJob()">+ Post Job</button>
     <div id="jobs"></div>
   </div>
 
   <!-- DRIVERS -->
-
   <div id="driversTab" class="hidden">
     <div id="drivers"></div>
   </div>
 
   <!-- INPUT BAR -->
-
   <div class="inputBar">
     <div class="attachBtn" onclick="attachPhoto()">📸</div>
     <input id="msgInput" placeholder="Message drivers..." oninput="onTyping()">
@@ -479,7 +471,6 @@
 </div>
 
 <!-- PROFILE MODAL -->
-
 <div id="profileModal">
   <div class="profileCard">
     <div class="profileAvatar" id="profileAvatar"></div>
@@ -556,28 +547,28 @@
     const name = nameInput.value.trim();
     if (!name) return;
 
+    // Sign in anonymously to get a real Firebase UID
+    await signInAnonymously(auth);
+    const user = auth.currentUser;
+    currentUserId = user.uid;
     currentUserName = name;
-    currentUserId = crypto.randomUUID();
 
     document.getElementById('login').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     setStatus(true);
 
-    // Create / update driver profile (non-blocking)
-    try {
-      await setDoc(doc(driversRef, currentUserId), {
-        name: currentUserName,
-        online: true,
-        lastSeen: serverTimestamp()
-      }, { merge: true });
+    // Create / update driver profile
+    await setDoc(doc(driversRef, currentUserId), {
+      name: currentUserName,
+      online: true,
+      lastSeen: serverTimestamp()
+    }, { merge: true });
 
-      await setDoc(doc(presenceRef, currentUserId), {
-        online: true,
-        lastSeen: serverTimestamp()
-      }, { merge: true });
-    } catch (e) {
-      console.warn('Presence write failed:', e);
-    }
+    // Presence
+    await setDoc(doc(presenceRef, currentUserId), {
+      online: true,
+      lastSeen: serverTimestamp()
+    }, { merge: true });
 
     // Listen to data
     startMessageListener();
