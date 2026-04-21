@@ -717,20 +717,30 @@ setTimeout(() => {
 
   // CAMERA ATTACH + UPLOAD
   async function attachPhoto() {
-    if (!currentUserId) return;
+  if (!currentUserId) return;
 
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = 'environment';
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
 
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-      const storageRef = ref(storage, `photos/${currentUserId}/${Date.now()}_${file.name}`);
+    try {
+      const path = `photos/${currentUserId}/${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, path);
+
+      console.log("📤 Upload starting:", path);
+
       await uploadBytes(storageRef, file);
+
+      console.log("✅ Upload finished");
+
       const url = await getDownloadURL(storageRef);
+
+      console.log("🔗 Download URL:", url);
 
       await addDoc(messagesRef, {
         text: '',
@@ -740,10 +750,17 @@ setTimeout(() => {
         photoURL: url,
         timestamp: serverTimestamp()
       });
-    };
 
-    input.click();
-  }
+      console.log("📨 Message saved");
+
+    } catch (err) {
+      console.error("❌ PHOTO UPLOAD FAILED:", err);
+      alert("Upload failed: " + err.message);
+    }
+  };
+
+  input.click();
+}
 
   // JOBS
   function startJobsListener() {
