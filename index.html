@@ -257,7 +257,7 @@ html, body {
 
 <!-- FIREBASE (MODERN MODULAR VERSION) -->
 
-<script type="module">
+<script type="module"> console.log("DriverLink script loaded");
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
@@ -324,7 +324,13 @@ html, body {
   let username = "";
 
 window.login = function () {
-  username = document.getElementById("name").value;
+  const input = document.getElementById("name");
+  username = input.value.trim();
+
+  if (!username) {
+    alert("Enter a name");
+    return;
+  }
 
   document.getElementById("avatar").innerText =
     username.charAt(0).toUpperCase();
@@ -339,14 +345,7 @@ window.login = function () {
 
  
 
-  window.showTab = function(tab, el) {
-  document.getElementById("chat").classList.toggle("hidden", tab !== "chat");
-  document.getElementById("jobsTab").classList.toggle("hidden", tab !== "jobs");
-
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("activeTab"));
-
-  if (el) el.classList.add("activeTab");
-};
+  
 
   // 💬 SEND MESSAGE
 
@@ -467,20 +466,16 @@ window.login = function () {
     document.getElementById("jobs").innerHTML = html;
   });
 }
-  window.showTab = function(tab) {
+  window.showTab = function(tab, el) {
   document.getElementById("chat").classList.toggle("hidden", tab !== "chat");
   document.getElementById("jobsTab").classList.toggle("hidden", tab !== "jobs");
 
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("activeTab"));
-  event.target.classList.add("activeTab");
+
+  if (el) el.classList.add("activeTab");
 };
 
-  function updateStatusUI() {
-  document.getElementById("status").innerHTML =
-    isOnline
-      ? '<span class="statusDot online"></span>Online'
-      : '<span class="statusDot offline"></span>Offline';
-}let isOnline = true;
+let isOnline = true;
 
 function updateStatusUI() {
   document.getElementById("status").innerHTML =
@@ -489,8 +484,6 @@ function updateStatusUI() {
       : '<span class="statusDot offline"></span>Offline';
 }
 
-
-  
 setInterval(updateStatusUI, 2000);
 
 </script>
