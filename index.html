@@ -556,15 +556,15 @@
     }
     errorEl.innerText = '';
 
+    let userCredential;
     try {
-      await signInAnonymously(auth);
+      userCredential = await signInAnonymously(auth);
     } catch (e) {
       errorEl.innerText = '❌ ' + e.message;
       return;
     }
 
-    const user = auth.currentUser;
-    currentUserId = user.uid;
+    currentUserId = userCredential.user.uid;
     currentUserName = name;
 
     // Show app immediately
