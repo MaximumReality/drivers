@@ -887,7 +887,31 @@ if (data.avatarURL) {
   window.postJob = postJob;
   window.closeProfile = closeProfile;
   window.cancelPreview = cancelPreview;
-window.confirmAvatar = confirmAvatar;
+window.confirmAvatar = async function () {
+  alert("clicked set");
+
+  alert("file: " + (selectedAvatarFile ? "YES" : "NO"));
+  alert("user: " + (currentUserId || "NONE"));
+
+  try {
+    const storageRef = ref(storage, `avatars/${currentUserId}.jpg`);
+
+    await uploadBytes(storageRef, selectedAvatarFile);
+
+    const url = await getDownloadURL(storageRef);
+
+    await updateDoc(doc(driversRef, currentUserId), {
+      avatarURL: url
+    });
+
+    alert("done");
+
+    cancelPreview();
+
+  } catch (e) {
+    alert("ERROR: " + e.message);
+  }
+};
 </script>
 <div id="avatarPreview" class="hidden">
   <div style="
