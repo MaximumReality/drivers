@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="icon" type="image/png" href="favicon.png">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>DriverLink</title>
+  <link rel="icon" href="favicon.png">
+
 
 <style>
   :root {
-    --bg: #ECE5DD; /* WhatsApp light wallpaper tone */
+    --bg: #ECE5DD;
     --panel: #FFFFFF;
     --panel-light: #F7F7F7;
     --accent: #25D366;
@@ -52,17 +52,11 @@
     z-index: 30;
   }
 
-  .avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .header img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     margin-right: 10px;
-    font-weight: bold;
   }
 
   #status {
@@ -95,6 +89,13 @@
     padding: 30px;
     z-index: 9999;
     text-align: center;
+  }
+
+  #login img {
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
+    margin: 0 auto 20px;
   }
 
   #login input {
@@ -151,8 +152,6 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 12px;
-
-    /* Wallpaper hook */
     background: url('wallpaper.PNG');
     background-size: 280px;
     background-repeat: repeat;
@@ -200,10 +199,6 @@
     color: var(--text-dim);
     margin-top: 4px;
     text-align: right;
-  }
-
-  .bubble .meta span {
-    margin-left: 4px;
   }
 
   .typingIndicator {
@@ -428,6 +423,7 @@
 
 <!-- LOGIN -->
 <div id="login">
+  <img src="icon.PNG">
   <h2 style="color:#128C7E;">DriverLink</h2>
   <p style="opacity:0.7;">Enter your name to continue</p>
   <input id="name" placeholder="Your name">
@@ -439,8 +435,8 @@
 
   <div class="header">
     <div style="display:flex;align-items:center;">
-      <span id="avatar" class="avatar"></span>
-      DriverLink
+      <img src="icon.PNG">
+      <span>DriverLink</span>
     </div>
     <span id="status"></span>
   </div>
@@ -470,7 +466,7 @@
 
   <!-- INPUT BAR -->
   <div class="inputBar">
-    <div class="attachBtn" onclick="attachPhoto()">📷</div>
+    <div class="attachBtn" onclick="attachPhoto()">📸</div>
     <input id="msgInput" placeholder="Message drivers..." oninput="onTyping()">
     <button onclick="sendMessage()">Send</button>
   </div>
@@ -487,366 +483,348 @@
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  onSnapshot,
-  query,
-  orderBy,
-  updateDoc,
-  doc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  // Firebase v9+ modular imports from CDN
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    onSnapshot,
+    serverTimestamp,
+    query,
+    orderBy,
+    doc,
+    setDoc,
+    updateDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-import {
-  getAuth,
-  signInAnonymously
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhvNqHgKH5auAOCPUm4wZITa_3N5Ctnvc",
+    authDomain: "driverlink-app.firebaseapp.com",
+    projectId: "driverlink-app",
+    storageBucket: "driverlink-app.firebasestorage.app",
+    messagingSenderId: "360444468582",
+    appId: "1:360444468582:web:0af78a95d0dfe104e9fca7",
+    measurementId: "G-MW6956PD0W"
+  };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDhvNqHgKH5auAOCPUm4wZITa_3N5Ctnvc",
-  authDomain: "driverlink-app.firebaseapp.com",
-  projectId: "driverlink-app",
-  storageBucket: "driverlink-app.firebasestorage.app",
-  messagingSenderId: "360444468582",
-  appId: "1:360444468582:web:0af78a95d0dfe104e9fca7"
-};
+  // Init Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+  // Collections
+  const messagesRef = collection(db, "messages");
+  const jobsRef = collection(db, "jobs");
+  const driversRef = collection(db, "drivers");
+  const presenceRef = collection(db, "presence");
+  const typingRef = collection(db, "typing");
 
-await signInAnonymously(auth);
+  // Local state
+  let currentUserId = null;
+  let currentUserName = null;
+  let typingTimeoutLocal = null;
 
-let username = "";
-let lastSender = null;
-let typingTimeout = null;
-let isOnline = true;
-let myPresenceDocId = null;
-
-// LOGIN
-window.login = async function () {
-  const input = document.getElementById("name");
-  username = input.value.trim();
-
-  if (!username) {
-    alert("Enter a name");
-    return;
+  // STATUS
+  function setStatus(isOnline) {
+    const status = document.getElementById('status');
+    status.innerHTML = `<span class="statusDot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}`;
   }
 
-  document.getElementById("avatar").innerText =
-    username.charAt(0).toUpperCase();
+  // LOGIN
+  async function login() {
+    const nameInput = document.getElementById('name');
+    const name = nameInput.value.trim();
+    if (!name) return;
 
-  document.getElementById("login").style.display = "none";
-  document.getElementById("app").classList.remove("hidden");
+    currentUserName = name;
+    currentUserId = crypto.randomUUID();
 
-  await initPresence();
-  loadMessages();
-  loadJobs();
-  loadDrivers();
-  updateStatusUI();
-};
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    setStatus(true);
 
-// PRESENCE
-async function initPresence() {
-  const presRef = await addDoc(collection(db, "presence"), {
-    name: username,
-    online: true,
-    typing: false,
-    lastSeen: serverTimestamp()
-  });
-  myPresenceDocId = presRef.id;
-
-  window.addEventListener("beforeunload", async () => {
-    try {
-      await updateDoc(doc(db, "presence", myPresenceDocId), {
-        online: false,
-        typing: false,
-        lastSeen: serverTimestamp()
-      });
-    } catch (e) {}
-  });
-}
-
-// SEND MESSAGE
-window.sendMessage = async function () {
-  const input = document.getElementById("msgInput");
-  const text = input.value.trim();
-  if (!text) return;
-
-  await addDoc(collection(db, "messages"), {
-    name: username,
-    text,
-    time: serverTimestamp(),
-    delivered: true,
-    seen: false
-  });
-
-  input.value = "";
-  setTyping(false);
-};
-
-// TYPING
-window.onTyping = function () {
-  setTyping(true);
-  if (typingTimeout) clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => setTyping(false), 2000);
-};
-
-async function setTyping(isTyping) {
-  if (!myPresenceDocId) return;
-  try {
-    await updateDoc(doc(db, "presence", myPresenceDocId), {
-      typing: isTyping,
+    // Create / update driver profile
+    await setDoc(doc(driversRef, currentUserId), {
+      name: currentUserName,
+      online: true,
       lastSeen: serverTimestamp()
+    }, { merge: true });
+
+    // Presence
+    await setDoc(doc(presenceRef, currentUserId), {
+      online: true,
+      lastSeen: serverTimestamp()
+    }, { merge: true });
+
+    // Listen to data
+    startMessageListener();
+    startJobsListener();
+    startDriversListener();
+    startTypingListener();
+
+    // Handle offline
+    window.addEventListener('beforeunload', async () => {
+      try {
+        await updateDoc(doc(presenceRef, currentUserId), {
+          online: false,
+          lastSeen: serverTimestamp()
+        });
+        await updateDoc(doc(driversRef, currentUserId), {
+          online: false,
+          lastSeen: serverTimestamp()
+        });
+      } catch (e) {
+        // ignore
+      }
     });
-  } catch (e) {}
-}
+  }
 
-// LOAD MESSAGES
-function loadMessages() {
-  const q = query(collection(db, "messages"), orderBy("time"));
+  // TABS
+  function showTab(tab, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('activeTab'));
+    el.classList.add('activeTab');
 
-  onSnapshot(q, async (snapshot) => {
-    const container = document.getElementById("messages");
-    container.innerHTML = "";
-    lastSender = null;
+    document.getElementById('chat').classList.add('hidden');
+    document.getElementById('jobsTab').classList.add('hidden');
+    document.getElementById('driversTab').classList.add('hidden');
 
-    const docs = [];
-    snapshot.forEach(d => docs.push(d));
+    if (tab === 'chat') document.getElementById('chat').classList.remove('hidden');
+    if (tab === 'jobs') document.getElementById('jobsTab').classList.remove('hidden');
+    if (tab === 'drivers') document.getElementById('driversTab').classList.remove('hidden');
+  }
 
-    // Mark all as seen (group-style)
-    for (const d of docs) {
-      const m = d.data();
-      if (!m.seen) {
-        try {
-          await updateDoc(doc(db, "messages", d.id), { seen: true });
-        } catch (e) {}
-      }
-    }
+  // REAL-TIME MESSAGES
+  function startMessageListener() {
+    const q = query(messagesRef, orderBy('timestamp', 'asc'));
+    onSnapshot(q, (snapshot) => {
+      const msgArea = document.getElementById('messages');
+      msgArea.innerHTML = '';
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const bubble = document.createElement('div');
+        const isMe = data.senderId === currentUserId;
+        bubble.className = 'bubble ' + (isMe ? 'me' : 'them');
 
-    docs.forEach((docSnap) => {
-      const m = docSnap.data();
-      const isMe = m.name === username;
-
-      const bubble = document.createElement("div");
-      bubble.className = "bubble " + (isMe ? "me" : "them");
-
-      if (!isMe && lastSender !== m.name) {
-        const name = document.createElement("div");
-        name.className = "name";
-        name.innerText = m.name;
-        name.onclick = () => openProfile(m.name);
-        bubble.appendChild(name);
-      }
-
-      const textNode = document.createElement("div");
-      textNode.innerText = m.text;
-      bubble.appendChild(textNode);
-
-      const meta = document.createElement("div");
-      meta.className = "meta";
-
-      const timeStr = m.time?.toDate
-        ? m.time.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-        : "";
-
-      const timeSpan = document.createElement("span");
-      timeSpan.innerText = timeStr;
-      meta.appendChild(timeSpan);
-
-      if (isMe) {
-        const statusSpan = document.createElement("span");
-        if (m.seen) {
-          statusSpan.innerText = "✓✓";
-        } else if (m.delivered) {
-          statusSpan.innerText = "✓";
+        let content = '';
+        if (data.type === 'photo' && data.photoURL) {
+          content = `<img src="${data.photoURL}" style="max-width:100%;border-radius:10px;margin-top:4px;">`;
+        } else {
+          content = data.text || '';
         }
-        meta.appendChild(statusSpan);
-      }
 
-      bubble.appendChild(meta);
-      container.appendChild(bubble);
+        bubble.innerHTML = `
+          <div class="name">${data.senderName || 'Driver'}</div>
+          <div>${content}</div>
+          <div class="meta">${data.timestamp?.toDate ? data.timestamp.toDate().toLocaleTimeString() : ''}</div>
+        `;
+        msgArea.appendChild(bubble);
+      });
+      msgArea.scrollTop = msgArea.scrollHeight;
+    });
+  }
 
-      lastSender = m.name;
+  // SEND MESSAGE
+  async function sendMessage() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text || !currentUserId) return;
+
+    await addDoc(messagesRef, {
+      text,
+      senderId: currentUserId,
+      senderName: currentUserName || 'Driver',
+      type: 'text',
+      timestamp: serverTimestamp()
     });
 
-    container.scrollTop = container.scrollHeight;
-  });
-}
+    input.value = '';
+    await setDoc(doc(typingRef, currentUserId), { typing: false }, { merge: true });
+  }
 
-// JOBS
-window.postJob = async function () {
-  let from = prompt("Pickup location:");
-  if (!from) return;
+  // TYPING
+  async function onTyping() {
+    if (!currentUserId) return;
+    const typingEl = document.getElementById('typing');
 
-  let to = prompt("Dropoff location:");
-  if (!to) return;
+    await setDoc(doc(typingRef, currentUserId), { typing: true }, { merge: true });
 
-  let time = prompt("Time:");
-  if (!time) return;
+    clearTimeout(typingTimeoutLocal);
+    typingTimeoutLocal = setTimeout(async () => {
+      await setDoc(doc(typingRef, currentUserId), { typing: false }, { merge: true });
+    }, 800);
 
-  await addDoc(collection(db, "jobs"), {
-    from,
-    to,
-    time,
-    postedBy: username,
-    takenBy: null,
-    status: "available" // available, claimed, on_route, completed
-  });
-};
+    typingEl.classList.remove('hidden');
+    typingEl.innerText = "You are typing…";
+  }
 
-window.claimJob = async function (id) {
-  const confirmTake = confirm("Claim this job?");
-  if (!confirmTake) return;
+  function startTypingListener() {
+    onSnapshot(typingRef, (snapshot) => {
+      const typingEl = document.getElementById('typing');
+      let someoneTyping = false;
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.typing && docSnap.id !== currentUserId) {
+          someoneTyping = true;
+        }
+      });
+      if (someoneTyping) {
+        typingEl.classList.remove('hidden');
+        typingEl.innerText = "Someone is typing…";
+      } else {
+        typingEl.classList.add('hidden');
+      }
+    });
+  }
 
-  await updateDoc(doc(db, "jobs", id), {
-    takenBy: username,
-    status: "claimed"
-  });
-};
+  // CAMERA ATTACH + UPLOAD
+  async function attachPhoto() {
+    if (!currentUserId) return;
 
-window.markOnRoute = async function (id) {
-  await updateDoc(doc(db, "jobs", id), {
-    status: "on_route"
-  });
-};
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
 
-window.markCompleted = async function (id) {
-  await updateDoc(doc(db, "jobs", id), {
-    status: "completed"
-  });
-};
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
 
-function statusLabel(j) {
-  if (j.status === "completed") return "✅ Completed";
-  if (j.status === "on_route") return "🟡 On route";
-  if (j.status === "claimed") return `🔴 Claimed by ${j.takenBy}`;
-  return "🟢 Available";
-}
+      const storageRef = ref(storage, `photos/${currentUserId}/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
 
-function loadJobs() {
-  onSnapshot(collection(db, "jobs"), (snapshot) => {
-    let html = "";
+      await addDoc(messagesRef, {
+        text: '',
+        senderId: currentUserId,
+        senderName: currentUserName || 'Driver',
+        type: 'photo',
+        photoURL: url,
+        timestamp: serverTimestamp()
+      });
+    };
 
-    snapshot.forEach((docSnap) => {
-      let j = docSnap.data();
+    input.click();
+  }
 
-      html += `
-        <div class="jobCard">
-          <div class="jobRoute">🚗 ${j.from} → ${j.to}</div>
-          <div class="jobMeta">🕒 ${j.time}</div>
-          <div class="jobStatus">${statusLabel(j)}</div>
-          <div class="jobHint">Posted by ${j.postedBy}</div>
+  // JOBS
+  function startJobsListener() {
+    const q = query(jobsRef, orderBy('timestamp', 'desc'));
+    onSnapshot(q, (snapshot) => {
+      const jobsEl = document.getElementById('jobs');
+      jobsEl.innerHTML = '';
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const card = document.createElement('div');
+        card.className = 'jobCard';
+
+        const statusText = data.status || 'open';
+        const claimedBy = data.claimedBy ? `Claimed by ${data.claimedByName || 'driver'}` : 'Not claimed yet';
+
+        card.innerHTML = `
+          <div class="jobRoute">${data.route || 'Job'}</div>
+          <div class="jobMeta">${data.postedBy || 'Dispatcher'}</div>
+          <div class="jobStatus">Status: ${statusText}</div>
+          <div class="jobHint">${claimedBy}</div>
           <div class="jobActions">
-            ${j.status === "available" ? `<button class="jobBtn primary" onclick="claimJob('${docSnap.id}')">Claim</button>` : ""}
-            ${j.status === "claimed" && j.takenBy === username ? `<button class="jobBtn secondary" onclick="markOnRoute('${docSnap.id}')">On Route</button>` : ""}
-            ${j.status === "on_route" && j.takenBy === username ? `<button class="jobBtn secondary" onclick="markCompleted('${docSnap.id}')">Complete</button>` : ""}
+            ${statusText === 'open' ? '<button class="jobBtn primary">Claim</button>' : ''}
           </div>
-        </div>
-      `;
+        `;
+
+        if (statusText === 'open') {
+          const btn = card.querySelector('.jobBtn.primary');
+          btn.onclick = async () => {
+            await updateDoc(doc(jobsRef, docSnap.id), {
+              status: 'claimed',
+              claimedBy: currentUserId,
+              claimedByName: currentUserName || 'Driver'
+            });
+          };
+        }
+
+        jobsEl.appendChild(card);
+      });
     });
+  }
 
-    document.getElementById("jobs").innerHTML = html;
-  });
-}
+  async function postJob() {
+    if (!currentUserId) return;
+    const route = prompt("Job route / description:");
+    if (!route) return;
 
-// DRIVERS + TYPING
-function loadDrivers() {
-  onSnapshot(collection(db, "presence"), (snapshot) => {
-    const driversEl = document.getElementById("drivers");
-    const typingEl = document.getElementById("typing");
-    driversEl.innerHTML = "";
-
-    let typingNames = [];
-
-    snapshot.forEach((docSnap) => {
-      const p = docSnap.data();
-      const isMe = p.name === username;
-
-      const card = document.createElement("div");
-      card.className = "driverCard";
-      card.onclick = () => openProfile(p.name);
-
-      const avatar = document.createElement("div");
-      avatar.className = "driverAvatar";
-      avatar.innerText = p.name?.charAt(0)?.toUpperCase() || "?";
-
-      const info = document.createElement("div");
-      info.className = "driverInfo";
-
-      const name = document.createElement("div");
-      name.className = "driverName";
-      name.innerText = p.name + (isMe ? " (You)" : "");
-
-      const status = document.createElement("div");
-      status.className = "driverStatus";
-      status.innerText = p.online ? "Online" : "Offline";
-
-      info.appendChild(name);
-      info.appendChild(status);
-
-      card.appendChild(avatar);
-      card.appendChild(info);
-      driversEl.appendChild(card);
-
-      if (p.typing && !isMe) {
-        typingNames.push(p.name);
-      }
+    await addDoc(jobsRef, {
+      route,
+      postedBy: currentUserName || 'Dispatcher',
+      status: 'open',
+      timestamp: serverTimestamp()
     });
+  }
 
-    if (typingNames.length > 0) {
-      typingEl.classList.remove("hidden");
-      typingEl.innerText =
-        typingNames.length === 1
-          ? `${typingNames[0]} is typing...`
-          : `${typingNames.join(", ")} are typing...`;
-    } else {
-      typingEl.classList.add("hidden");
-      typingEl.innerText = "";
-    }
-  });
-}
+  // DRIVERS
+  function startDriversListener() {
+    onSnapshot(driversRef, (snapshot) => {
+      const driversEl = document.getElementById('drivers');
+      driversEl.innerHTML = '';
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const card = document.createElement('div');
+        card.className = 'driverCard';
 
-// PROFILE MODAL
-window.openProfile = function (name) {
-  const modal = document.getElementById("profileModal");
-  const avatar = document.getElementById("profileAvatar");
-  const pname = document.getElementById("profileName");
-  const meta = document.getElementById("profileMeta");
+        const avatar = document.createElement('div');
+        avatar.className = 'driverAvatar';
+        avatar.innerText = (data.name || 'D')[0].toUpperCase();
 
-  avatar.innerText = name.charAt(0).toUpperCase();
-  pname.innerText = name;
-  meta.innerText = "Driver in the network • Real-time presence enabled";
+        const info = document.createElement('div');
+        info.className = 'driverInfo';
 
-  modal.style.display = "flex";
-};
+        const nameEl = document.createElement('div');
+        nameEl.className = 'driverName';
+        nameEl.innerText = data.name || 'Driver';
 
-window.closeProfile = function () {
-  document.getElementById("profileModal").style.display = "none";
-};
+        const statusEl = document.createElement('div');
+        statusEl.className = 'driverStatus';
+        statusEl.innerText = data.online ? 'Online' : 'Offline';
 
-// TABS
-window.showTab = function (tab, el) {
-  document.getElementById("chat").classList.toggle("hidden", tab !== "chat");
-  document.getElementById("jobsTab").classList.toggle("hidden", tab !== "jobs");
-  document.getElementById("driversTab").classList.toggle("hidden", tab !== "drivers");
+        info.appendChild(nameEl);
+        info.appendChild(statusEl);
 
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("activeTab"));
-  if (el) el.classList.add("activeTab");
-};
+        card.appendChild(avatar);
+        card.appendChild(info);
 
-// STATUS
-function updateStatusUI() {
-  document.getElementById("status").innerHTML =
-    isOnline
-      ? '<span class="statusDot online"></span>Online'
-      : '<span class="statusDot offline"></span>Offline';
-}
+        card.onclick = () => openProfile(docSnap.id, data);
 
-setInterval(updateStatusUI, 5000);
+        driversEl.appendChild(card);
+      });
+    });
+  }
+
+  function openProfile(id, data) {
+    document.getElementById('profileAvatar').innerText = (data.name || 'D')[0].toUpperCase();
+    document.getElementById('profileName').innerText = data.name || 'Driver';
+    document.getElementById('profileMeta').innerText = data.online ? 'Online' : 'Offline';
+    document.getElementById('profileModal').style.display = 'flex';
+  }
+
+  function closeProfile() {
+    document.getElementById('profileModal').style.display = 'none';
+  }
+
+  // Expose functions for inline handlers
+  window.login = login;
+  window.showTab = showTab;
+  window.sendMessage = sendMessage;
+  window.onTyping = onTyping;
+  window.attachPhoto = attachPhoto;
+  window.postJob = postJob;
+  window.closeProfile = closeProfile;
 </script>
+
 </body>
 </html>
