@@ -6,13 +6,13 @@
 
 <style>
   :root {
-    --bg: #0b141a;
-    --panel: #111b21;
-    --panel-light: #1f2c34;
+    --bg: #ECE5DD; /* WhatsApp light wallpaper tone */
+    --panel: #FFFFFF;
+    --panel-light: #F7F7F7;
     --accent: #25D366;
     --accent-dark: #128C7E;
-    --text: #e9edef;
-    --text-dim: #8696a0;
+    --text: #111;
+    --text-dim: #555;
   }
 
   html, body {
@@ -22,7 +22,12 @@
     background: var(--bg);
     color: var(--text);
     font-family: system-ui, -apple-system, Arial;
-    overflow: hidden;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  * {
+    box-sizing: inherit;
   }
 
   .hidden { display: none; }
@@ -35,6 +40,10 @@
     font-weight: bold;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    white-space: nowrap;
+    overflow: hidden;
+    color: white;
     position: fixed;
     top: 0;
     width: 100%;
@@ -55,9 +64,11 @@
   }
 
   #status {
-    margin-left: auto;
+    flex-shrink: 1;
+    max-width: 80px;
+    text-overflow: ellipsis;
+    overflow: hidden;
     font-size: 14px;
-    opacity: 0.9;
   }
 
   .statusDot {
@@ -124,8 +135,8 @@
   }
 
   .activeTab {
-    color: var(--accent);
-    border-bottom: 2px solid var(--accent);
+    color: var(--accent-dark);
+    border-bottom: 2px solid var(--accent-dark);
   }
 
   /* PANELS */
@@ -138,6 +149,11 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 12px;
+
+    /* Wallpaper hook */
+    background: url('wallpaper.png');
+    background-size: 280px;
+    background-repeat: repeat;
   }
 
   /* CHAT */
@@ -165,14 +181,14 @@
   }
 
   .bubble.them {
-    background: var(--panel-light);
+    background: var(--panel);
     border-bottom-left-radius: 4px;
     display: block;
   }
 
   .bubble .name {
     font-weight: bold;
-    color: var(--accent);
+    color: var(--accent-dark);
     margin-bottom: 2px;
     font-size: 13px;
   }
@@ -203,7 +219,21 @@
     background: var(--panel);
     padding: 10px;
     display: flex;
+    align-items: center;
     z-index: 30;
+  }
+
+  .attachBtn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--panel-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    font-size: 20px;
+    cursor: pointer;
   }
 
   .inputBar input {
@@ -216,21 +246,21 @@
 
   .inputBar button {
     margin-left: 10px;
-    background: var(--accent);
+    background: var(--accent-dark);
     border: none;
     padding: 10px 16px;
     border-radius: 20px;
-    color: #000;
+    color: white;
     font-weight: bold;
   }
 
   /* JOBS */
   .jobCard {
-    background: var(--panel-light);
+    background: var(--panel);
     margin: 10px 0;
     padding: 14px;
     border-radius: 14px;
-    border-left: 4px solid var(--accent);
+    border-left: 4px solid var(--accent-dark);
     transition: 0.15s ease;
   }
 
@@ -281,7 +311,7 @@
   }
 
   .jobBtn.secondary {
-    background: #202c33;
+    background: var(--panel-light);
     color: var(--text);
   }
 
@@ -290,15 +320,15 @@
     padding: 12px;
     border: none;
     border-radius: 10px;
-    background: var(--accent);
-    color: #000;
+    background: var(--accent-dark);
+    color: white;
     font-weight: bold;
     width: 100%;
   }
 
   /* DRIVERS */
   .driverCard {
-    background: var(--panel-light);
+    background: var(--panel);
     margin: 8px 0;
     padding: 10px;
     border-radius: 10px;
@@ -347,7 +377,7 @@
   }
 
   .profileCard {
-    background: var(--panel-light);
+    background: var(--panel);
     padding: 20px;
     border-radius: 14px;
     width: 80%;
@@ -386,8 +416,8 @@
     padding: 8px 14px;
     border-radius: 8px;
     border: none;
-    background: var(--accent);
-    color: #000;
+    background: var(--accent-dark);
+    color: white;
     font-weight: 500;
   }
 </style>
@@ -396,7 +426,7 @@
 
 <!-- LOGIN -->
 <div id="login">
-  <h2 style="color:#25D366;">DriverLink</h2>
+  <h2 style="color:#128C7E;">DriverLink</h2>
   <p style="opacity:0.7;">Enter your name to continue</p>
   <input id="name" placeholder="Your name">
   <button onclick="login()">Enter Network</button>
@@ -406,8 +436,10 @@
 <div id="app" class="hidden">
 
   <div class="header">
-    <span id="avatar" class="avatar"></span>
-    DriverLink
+    <div style="display:flex;align-items:center;">
+      <span id="avatar" class="avatar"></span>
+      DriverLink
+    </div>
     <span id="status"></span>
   </div>
 
@@ -436,6 +468,7 @@
 
   <!-- INPUT BAR -->
   <div class="inputBar">
+    <div class="attachBtn" onclick="attachPhoto()">📎</div>
     <input id="msgInput" placeholder="Message drivers..." oninput="onTyping()">
     <button onclick="sendMessage()">Send</button>
   </div>
