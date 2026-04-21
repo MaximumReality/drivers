@@ -750,15 +750,38 @@ function attachPhoto() {
 }
 
 async function confirmAvatar() {
-  if (!selectedAvatarFile || !currentUserId) return;
+  try {
+    alert("1. function started");
 
-  const storageRef = ref(storage, `avatars/${currentUserId}.jpg`);
-  await uploadBytes(storageRef, selectedAvatarFile);
-  const url = await getDownloadURL(storageRef);
+    if (!selectedAvatarFile || !currentUserId) {
+      alert("missing data");
+      return;
+    }
 
-  await updateDoc(doc(driversRef, currentUserId), {
-    avatarURL: url
-  });
+    const storageRef = ref(storage, `avatars/${currentUserId}.jpg`);
+
+    alert("2. uploading...");
+
+    await uploadBytes(storageRef, selectedAvatarFile);
+
+    alert("3. upload done");
+
+    const url = await getDownloadURL(storageRef);
+
+    alert("4. got url");
+
+    await updateDoc(doc(driversRef, currentUserId), {
+      avatarURL: url
+    });
+
+    alert("5. saved");
+
+    cancelPreview();
+
+  } catch (e) {
+    alert("ERROR: " + e.message);
+  }
+}
 
   // instant UI update
   document.querySelectorAll('.driverAvatar').forEach(el => {
