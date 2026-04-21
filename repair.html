@@ -425,7 +425,6 @@
   <h2 style="color:#128C7E;">DriverLink</h2>
   <p style="opacity:0.7;">Enter your name to continue</p>
   <input id="name" placeholder="Your name">
-
   <button onclick="login()">Enter Network</button>
 </div>
 
@@ -465,6 +464,7 @@
 
   <!-- INPUT BAR -->
   <div class="inputBar">
+    <div class="attachBtn" onclick="attachPhoto()">📸</div>
     <input id="msgInput" placeholder="Message drivers..." oninput="onTyping()">
     <button onclick="sendMessage()">Send</button>
   </div>
@@ -480,7 +480,7 @@
   </div>
 </div>
 
-<script type="module"> alert("SCRIPT LOADED");
+<script type="module">
   // Firebase v9+ modular imports from CDN
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
@@ -495,7 +495,12 @@
     setDoc,
     updateDoc
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  
+  import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
   import {
     getAuth,
     signInAnonymously
@@ -514,7 +519,7 @@
   // Init Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  
+  const storage = getStorage(app);
   const auth = getAuth(app);
 
   // Collections
@@ -560,7 +565,6 @@
     }
 
     currentUserId = userCredential.user.uid;
-    alert("LOGIN SUCCESS. UID = " + currentUserId);
     currentUserName = name;
 
     // Show app immediately
@@ -580,9 +584,7 @@ setTimeout(() => {
     startJobsListener();
     startDriversListener();
     startTypingListener();
-  
-    alert("ABOUT TO WRITE FIRESTORE");
-  
+
     // Write profile in background - non-blocking
     try {
       await setDoc(doc(driversRef, currentUserId), {
@@ -595,33 +597,26 @@ setTimeout(() => {
         online: true,
         lastSeen: serverTimestamp()
       }, { merge: true });
-    } 
-      catch(e) {
-  alert("FIRESTORE FAILED: " + e.message);
-  console.error(e);
-}
-  alert("LOGIN FAILED: " + e.message);
-  console.error(e);
-}
+    } catch(e) {
+      console.warn('Profile write failed:', e);
+    }
 
     // Handle offline
     window.addEventListener('beforeunload', async () => {
-  try {
-    await setDoc(doc(presenceRef, currentUserId), {
-      online: false,
-      lastSeen: serverTimestamp()
-    }, { merge: true });
-
-    await setDoc(doc(driversRef, currentUserId), {
-      online: false,
-      lastSeen: serverTimestamp()
-    }, { merge: true });
-
-  } catch (e) {
-    // optional: you can log this if debugging
-    console.log("Offline update failed:", e);
+      try {
+        await updateDoc(doc(presenceRef, currentUserId), {
+          online: false,
+          lastSeen: serverTimestamp()
+        });
+        await updateDoc(doc(driversRef, currentUserId), {
+          online: false,
+          lastSeen: serverTimestamp()
+        });
+      } catch (e) {
+        // ignore
+      }
+    });
   }
-});
 
   // TABS
   function showTab(tab, el) {
@@ -649,7 +644,12 @@ setTimeout(() => {
         const isMe = data.senderId === currentUserId;
         bubble.className = 'bubble ' + (isMe ? 'me' : 'them');
 
-        let content = data.text || '';
+        let content = '';
+        if (data.type === 'photo' && data.photoURL) {
+          content = `<img src="${data.photoURL}" style="max-width:100%;border-radius:10px;margin-top:4px;">`;
+        } else {
+          content = data.text || '';
+        }
 
         bubble.innerHTML = `
           <div class="name">${data.senderName || 'Driver'}</div>
@@ -715,7 +715,35 @@ setTimeout(() => {
     });
   }
 
-  
+  // CAMERA ATTACH + UPLOAD
+  async function attachPhoto() {
+    if (!currentUserId) return;
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const storageRef = ref(storage, `photos/${currentUserId}/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+
+      await addDoc(messagesRef, {
+        text: '',
+        senderId: currentUserId,
+        senderName: currentUserName || 'Driver',
+        type: 'photo',
+        photoURL: url,
+        timestamp: serverTimestamp()
+      });
+    };
+
+    input.click();
+  }
 
   // JOBS
   function startJobsListener() {
@@ -823,7 +851,8 @@ setTimeout(() => {
   window.login = login;
   window.showTab = showTab;
   window.sendMessage = sendMessage;
-  window.onTyping = onTyping;  
+  window.onTyping = onTyping;
+  window.attachPhoto = attachPhoto;
   window.postJob = postJob;
   window.closeProfile = closeProfile;
 </script>
