@@ -677,6 +677,7 @@
   ];
 
   let currentUserId = null;
+  let driversCache = {};
   let currentUserName = null;
   let currentAvatarFile = 'driver-1.jpg';
   let typingTimeoutLocal = null;
@@ -829,7 +830,8 @@
             <div class="meta">${data.timestamp?.toDate ? data.timestamp.toDate().toLocaleTimeString() : ''}</div>
           `;
         } else {
-          const avatarEl = makeAvatarEl(data.avatarFile, data.senderName, 32);
+          const driver = driversCache[data.senderId] || {};
+          const avatarEl = makeAvatarEl(driver.avatarFile || data.avatarFile, data.senderName, 32);
           const content = document.createElement('div');
           content.className = 'bubbleContent';
           content.innerHTML = `
@@ -943,8 +945,10 @@
     onSnapshot(driversRef, (snapshot) => {
       const driversEl = document.getElementById('drivers');
       driversEl.innerHTML = '';
+      driversCache = {};
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
+        driversCache[docSnap.id] = data;
         const card = document.createElement('div');
         card.className = 'driverCard';
 
@@ -954,7 +958,7 @@
         info.className = 'driverInfo';
         info.innerHTML = `
           <div class="driverName">${data.name || 'Driver'}</div>
-          <div class="driverStatus">${data.online ? '🟢 Online' : '⚫ Offline'}</div>
+          <div class="driverStatus">${data.online ? '🟢 ' + LANGS[currentLang].online : '⚫ ' + LANGS[currentLang].offline}</div>
         `;
 
         card.appendChild(avatarEl);
