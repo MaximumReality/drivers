@@ -3,6 +3,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>DriverLink</title>
+  <link rel="icon" href="favicon.png">
 
 <style>
   :root {
@@ -26,13 +27,10 @@
     box-sizing: border-box;
   }
 
-  * {
-    box-sizing: inherit;
-  }
+  * { box-sizing: inherit; }
 
   .hidden { display: none; }
 
-  /* HEADER */
   .header {
     background: var(--accent-dark);
     padding: 14px;
@@ -41,8 +39,6 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    white-space: nowrap;
-    overflow: hidden;
     color: white;
     position: fixed;
     top: 0;
@@ -60,8 +56,6 @@
   #status {
     flex-shrink: 1;
     max-width: 80px;
-    text-overflow: ellipsis;
-    overflow: hidden;
     font-size: 14px;
   }
 
@@ -76,7 +70,6 @@
   .online { background: var(--accent); }
   .offline { background: #ff4d4d; }
 
-  /* LOGIN */
   #login {
     position: fixed;
     inset: 0;
@@ -116,7 +109,6 @@
     width: 100%;
   }
 
-  /* TABS */
   .tabs {
     display: flex;
     background: var(--panel);
@@ -140,7 +132,6 @@
     border-bottom: 2px solid var(--accent-dark);
   }
 
-  /* PANELS */
   #chat, #jobsTab, #driversTab {
     position: absolute;
     top: 110px;
@@ -155,10 +146,7 @@
     background-repeat: repeat;
   }
 
-  /* CHAT */
-  #messages {
-    padding-bottom: 8px;
-  }
+  #messages { padding-bottom: 8px; }
 
   .bubble {
     max-width: 80%;
@@ -168,7 +156,6 @@
     line-height: 1.4;
     font-size: 15px;
     position: relative;
-    display: inline-block;
   }
 
   .bubble.me {
@@ -182,8 +169,35 @@
   .bubble.them {
     background: var(--panel);
     border-bottom-left-radius: 4px;
-    display: block;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: 85%;
   }
+
+  .bubbleAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 13px;
+    color: #000;
+  }
+
+  .bubbleAvatar img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .bubbleContent { flex: 1; }
 
   .bubble .name {
     font-weight: bold;
@@ -206,7 +220,6 @@
     font-style: italic;
   }
 
-  /* INPUT BAR */
   .inputBar {
     position: fixed;
     bottom: 0;
@@ -216,19 +229,6 @@
     display: flex;
     align-items: center;
     z-index: 30;
-  }
-
-  .attachBtn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--panel-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 8px;
-    font-size: 20px;
-    cursor: pointer;
   }
 
   .inputBar input {
@@ -249,7 +249,6 @@
     font-weight: bold;
   }
 
-  /* JOBS */
   .jobCard {
     background: var(--panel);
     margin: 10px 0;
@@ -259,31 +258,11 @@
     transition: 0.15s ease;
   }
 
-  .jobCard:active {
-    transform: scale(0.97);
-  }
-
-  .jobRoute {
-    font-size: 17px;
-    font-weight: bold;
-  }
-
-  .jobMeta {
-    font-size: 13px;
-    opacity: 0.7;
-    margin-top: 4px;
-  }
-
-  .jobStatus {
-    margin-top: 6px;
-    font-size: 13px;
-  }
-
-  .jobHint {
-    margin-top: 8px;
-    font-size: 11px;
-    opacity: 0.5;
-  }
+  .jobCard:active { transform: scale(0.97); }
+  .jobRoute { font-size: 17px; font-weight: bold; }
+  .jobMeta { font-size: 13px; opacity: 0.7; margin-top: 4px; }
+  .jobStatus { margin-top: 6px; font-size: 13px; }
+  .jobHint { margin-top: 8px; font-size: 11px; opacity: 0.5; }
 
   .jobActions {
     margin-top: 10px;
@@ -300,15 +279,8 @@
     cursor: pointer;
   }
 
-  .jobBtn.primary {
-    background: var(--accent);
-    color: #000;
-  }
-
-  .jobBtn.secondary {
-    background: var(--panel-light);
-    color: var(--text);
-  }
+  .jobBtn.primary { background: var(--accent); color: #000; }
+  .jobBtn.secondary { background: var(--panel-light); color: var(--text); }
 
   .postJobBtn {
     margin: 10px 0;
@@ -321,7 +293,6 @@
     width: 100%;
   }
 
-  /* DRIVERS */
   .driverCard {
     background: var(--panel);
     margin: 8px 0;
@@ -333,8 +304,8 @@
   }
 
   .driverAvatar {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: var(--accent);
     color: #000;
@@ -343,22 +314,20 @@
     justify-content: center;
     margin-right: 10px;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 16px;
+    overflow: hidden;
+    flex-shrink: 0;
   }
 
-  .driverInfo {
-    flex: 1;
+  .driverAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  .driverName {
-    font-size: 15px;
-    font-weight: 500;
-  }
-
-  .driverStatus {
-    font-size: 12px;
-    color: var(--text-dim);
-  }
+  .driverInfo { flex: 1; }
+  .driverName { font-size: 15px; font-weight: 500; }
+  .driverStatus { font-size: 12px; color: var(--text-dim); }
 
   /* PROFILE MODAL */
   #profileModal {
@@ -375,14 +344,14 @@
     background: var(--panel);
     padding: 20px;
     border-radius: 14px;
-    width: 80%;
-    max-width: 320px;
+    width: 85%;
+    max-width: 340px;
     text-align: center;
   }
 
   .profileAvatar {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     background: var(--accent);
     color: #000;
@@ -390,21 +359,19 @@
     align-items: center;
     justify-content: center;
     margin: 0 auto 10px;
-    font-size: 26px;
+    font-size: 28px;
     font-weight: bold;
+    overflow: hidden;
   }
 
-  .profileName {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 4px;
+  .profileAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  .profileMeta {
-    font-size: 13px;
-    color: var(--text-dim);
-    margin-bottom: 12px;
-  }
+  .profileName { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .profileMeta { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; }
 
   .profileClose {
     margin-top: 10px;
@@ -415,6 +382,64 @@
     color: white;
     font-weight: 500;
   }
+
+  /* AVATAR PICKER */
+  #avatarPicker {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+
+  .avatarPickerCard {
+    background: var(--panel);
+    padding: 20px;
+    border-radius: 16px;
+    width: 88%;
+    max-width: 340px;
+    text-align: center;
+  }
+
+  .avatarPickerTitle {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 14px;
+    color: var(--accent-dark);
+  }
+
+  .avatarGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .avatarOption {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: border 0.15s;
+  }
+
+  .avatarOption.selected {
+    border-color: var(--accent-dark);
+  }
+
+  .avatarPickerClose {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent-dark);
+    color: white;
+    font-weight: bold;
+    width: 100%;
+  }
 </style>
 </head>
 <body>
@@ -422,10 +447,16 @@
 <!-- LOGIN -->
 <div id="login">
   <img src="icon.PNG">
-  <h2 style="color:#128C7E;">DriverLink</h2>
-  <p style="opacity:0.7;">Enter your name to continue</p>
-  <input id="name" placeholder="Your name">
-  <button onclick="login()">Enter Network</button>
+  <div style="display:flex;justify-content:center;gap:8px;margin-bottom:16px;">
+    <button class="langBtn" data-lang="en" onclick="setLang('en')" style="padding:6px 14px;border:2px solid var(--accent-dark);border-radius:20px;font-size:14px;font-weight:bold;cursor:pointer;background:var(--accent-dark);color:white;">EN</button>
+    <button class="langBtn" data-lang="fr" onclick="setLang('fr')" style="padding:6px 14px;border:2px solid var(--accent-dark);border-radius:20px;font-size:14px;font-weight:bold;cursor:pointer;background:transparent;color:var(--accent-dark);">FR</button>
+    <button class="langBtn" data-lang="ar" onclick="setLang('ar')" style="padding:6px 14px;border:2px solid var(--accent-dark);border-radius:20px;font-size:14px;font-weight:bold;cursor:pointer;background:transparent;color:var(--accent-dark);">عر</button>
+  </div>
+  <h2 id="loginTitle" style="color:#128C7E;">DriverLink</h2>
+  <p id="loginSubtitle" style="opacity:0.7;">Enter your name to continue</p>
+  <input id="nameInput" placeholder="Your name">
+  <button id="enterBtn" onclick="login()">Enter Network</button>
+  <p id="loginError" style="color:red;font-size:13px;margin-top:10px;"></p>
 </div>
 
 <!-- APP -->
@@ -440,33 +471,28 @@
   </div>
 
   <div class="tabs">
-    <div class="tab activeTab" onclick="showTab('chat', this)">Chat</div>
-    <div class="tab" onclick="showTab('jobs', this)">Jobs</div>
-    <div class="tab" onclick="showTab('drivers', this)">Drivers</div>
+    <div id="tabChat" class="tab activeTab" onclick="showTab('chat', this)">Chat</div>
+    <div id="tabJobs" class="tab" onclick="showTab('jobs', this)">Jobs</div>
+    <div id="tabDrivers" class="tab" onclick="showTab('drivers', this)">Drivers</div>
   </div>
 
-  <!-- CHAT -->
   <div id="chat">
     <div id="messages"></div>
     <div id="typing" class="typingIndicator hidden"></div>
   </div>
 
-  <!-- JOBS -->
   <div id="jobsTab" class="hidden">
-    <button class="postJobBtn" onclick="postJob()">+ Post Job</button>
+    <button id="postJobBtn" class="postJobBtn" onclick="postJob()">+ Post Job</button>
     <div id="jobs"></div>
   </div>
 
-  <!-- DRIVERS -->
   <div id="driversTab" class="hidden">
     <div id="drivers"></div>
   </div>
 
-  <!-- INPUT BAR -->
   <div class="inputBar">
-    <div class="attachBtn" onclick="attachPhoto()">📎</div>
     <input id="msgInput" placeholder="Message drivers..." oninput="onTyping()">
-    <button onclick="sendMessage()">Send</button>
+    <button id="sendBtn" onclick="sendMessage()">Send</button>
   </div>
 </div>
 
@@ -476,84 +502,238 @@
     <div class="profileAvatar" id="profileAvatar"></div>
     <div class="profileName" id="profileName"></div>
     <div class="profileMeta" id="profileMeta"></div>
-    <button class="profileClose" onclick="closeProfile()">Close</button>
+    <button id="changeAvatarBtn" style="margin-top:8px;padding:8px 14px;border-radius:8px;border:none;background:var(--accent);color:#000;font-weight:500;" onclick="openAvatarPicker()">Change Avatar</button>
+    <button id="closeProfileBtn" class="profileClose" onclick="closeProfile()">Close</button>
+  </div>
+</div>
+
+<!-- AVATAR PICKER -->
+<div id="avatarPicker">
+  <div class="avatarPickerCard">
+    <div id="avatarPickerTitle" class="avatarPickerTitle">Choose Your Avatar</div>
+    <div class="avatarGrid" id="avatarGrid"></div>
+    <button id="avatarDoneBtn" class="avatarPickerClose" onclick="closeAvatarPicker()">Done</button>
   </div>
 </div>
 
 <script type="module">
-  // Firebase v9+ modular imports from CDN
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
-    getFirestore,
-    collection,
-    addDoc,
-    onSnapshot,
-    serverTimestamp,
-    query,
-    orderBy,
-    doc,
-    setDoc,
-    updateDoc
+    getFirestore, collection, addDoc, onSnapshot,
+    serverTimestamp, query, orderBy, doc, setDoc, updateDoc
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import {
-    getStorage,
-    ref,
-    uploadBytes,
-    getDownloadURL
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-  import {
-    getAuth,
-    signInAnonymously
+    getAuth, signInAnonymously
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  // Your Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyB6zx5__XRT6R6UnR3EhVjZAx6I8VkIqHM",
     authDomain: "driver-uplink.firebaseapp.com",
     projectId: "driver-uplink",
-    storageBucket: "driver-uplink.appspot.com",
+    storageBucket: "driver-uplink.firebasestorage.app",
     messagingSenderId: "156011169296",
     appId: "1:156011169296:web:ed175cf12158e09e14ec95"
   };
 
-  // Init Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const storage = getStorage(app);
   const auth = getAuth(app);
 
-  // Collections
   const messagesRef = collection(db, "messages");
   const jobsRef = collection(db, "jobs");
   const driversRef = collection(db, "drivers");
   const presenceRef = collection(db, "presence");
   const typingRef = collection(db, "typing");
 
-  // Local state
+
+  const LANGS = {
+    en: {
+      dir: 'ltr',
+      title: 'DriverLink',
+      subtitle: 'Enter your name to continue',
+      placeholder: 'Your name',
+      enterBtn: 'Enter Network',
+      chat: 'Chat',
+      jobs: 'Jobs',
+      drivers: 'Drivers',
+      messagePlaceholder: 'Message drivers...',
+      send: 'Send',
+      online: 'Online',
+      offline: 'Offline',
+      postJob: '+ Post Job',
+      claim: 'Claim',
+      claimed: 'Claimed',
+      notClaimed: 'Not claimed yet',
+      claimedBy: 'Claimed by',
+      status: 'Status',
+      changeAvatar: 'Change Avatar',
+      close: 'Close',
+      chooseAvatar: 'Choose Your Avatar',
+      done: 'Done',
+      jobPrompt: 'Job route / description:',
+      typing: 'You are typing…',
+      someoneTyping: 'Someone is typing…',
+    },
+    fr: {
+      dir: 'ltr',
+      title: 'DriverLink',
+      subtitle: 'Entrez votre nom pour continuer',
+      placeholder: 'Votre nom',
+      enterBtn: 'Rejoindre le réseau',
+      chat: 'Chat',
+      jobs: 'Missions',
+      drivers: 'Chauffeurs',
+      messagePlaceholder: 'Message aux chauffeurs...',
+      send: 'Envoyer',
+      online: 'En ligne',
+      offline: 'Hors ligne',
+      postJob: '+ Nouvelle mission',
+      claim: 'Accepter',
+      claimed: 'Acceptée',
+      notClaimed: 'Non assignée',
+      claimedBy: 'Prise par',
+      status: 'Statut',
+      changeAvatar: 'Changer avatar',
+      close: 'Fermer',
+      chooseAvatar: 'Choisir votre avatar',
+      done: 'Terminer',
+      jobPrompt: 'Itinéraire / description:',
+      typing: 'Vous écrivez…',
+      someoneTyping: 'Quelqu'un écrit…',
+    },
+    ar: {
+      dir: 'rtl',
+      title: 'درايفر لينك',
+      subtitle: 'أدخل اسمك للمتابعة',
+      placeholder: 'اسمك',
+      enterBtn: 'الدخول إلى الشبكة',
+      chat: 'دردشة',
+      jobs: 'المهام',
+      drivers: 'السائقون',
+      messagePlaceholder: 'رسالة للسائقين...',
+      send: 'إرسال',
+      online: 'متصل',
+      offline: 'غير متصل',
+      postJob: '+ مهمة جديدة',
+      claim: 'قبول',
+      claimed: 'مقبولة',
+      notClaimed: 'غير مُسندة',
+      claimedBy: 'بواسطة',
+      status: 'الحالة',
+      changeAvatar: 'تغيير الصورة',
+      close: 'إغلاق',
+      chooseAvatar: 'اختر صورتك',
+      done: 'تم',
+      jobPrompt: 'المسار / الوصف:',
+      typing: 'أنت تكتب…',
+      someoneTyping: 'شخص ما يكتب…',
+    }
+  };
+
+  let currentLang = 'en';
+
+  function setLang(lang) {
+    currentLang = lang;
+    const t = LANGS[lang];
+    document.documentElement.dir = t.dir;
+    document.documentElement.lang = lang;
+
+    // Login screen
+    document.getElementById('loginTitle').innerText = t.title;
+    document.getElementById('loginSubtitle').innerText = t.subtitle;
+    document.getElementById('nameInput').placeholder = t.placeholder;
+    document.getElementById('enterBtn').innerText = t.enterBtn;
+
+    // Tabs
+    document.getElementById('tabChat').innerText = t.chat;
+    document.getElementById('tabJobs').innerText = t.jobs;
+    document.getElementById('tabDrivers').innerText = t.drivers;
+
+    // Input
+    document.getElementById('msgInput').placeholder = t.messagePlaceholder;
+    document.getElementById('sendBtn').innerText = t.send;
+
+    // Post job button
+    document.getElementById('postJobBtn').innerText = t.postJob;
+
+    // Avatar picker
+    document.getElementById('avatarPickerTitle').innerText = t.chooseAvatar;
+    document.getElementById('avatarDoneBtn').innerText = t.done;
+
+    // Profile modal buttons
+    document.getElementById('changeAvatarBtn').innerText = t.changeAvatar;
+    document.getElementById('closeProfileBtn').innerText = t.close;
+
+    // Highlight active lang button
+    document.querySelectorAll('.langBtn').forEach(b => {
+      b.style.background = b.dataset.lang === lang ? 'var(--accent-dark)' : 'transparent';
+      b.style.color = b.dataset.lang === lang ? 'white' : 'var(--accent-dark)';
+    });
+  }
+
+  const AVATARS = [
+    'driver-1.jpg','driver-2.jpg','driver-3.jpg','driver-4.jpg',
+    'driver-5.jpg','driver-6.jpg','driver-7.jpg'
+  ];
+
   let currentUserId = null;
   let currentUserName = null;
+  let currentAvatarFile = 'driver-1.jpg';
   let typingTimeoutLocal = null;
+  let viewingProfileId = null;
 
-  // STATUS
+  function avatarURL(filename) {
+    if (!filename) return null;
+    return `https://maximumreality.github.io/drivers/${filename}`;
+  }
+
   function setStatus(isOnline) {
     const status = document.getElementById('status');
     status.innerHTML = `<span class="statusDot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}`;
   }
 
+  // BUILD AVATAR GRID
+  const grid = document.getElementById('avatarGrid');
+  AVATARS.forEach(filename => {
+    const img = document.createElement('img');
+    img.src = avatarURL(filename);
+    img.className = 'avatarOption';
+    img.onclick = () => selectAvatar(filename);
+    grid.appendChild(img);
+  });
+
+  function selectAvatar(filename) {
+    document.querySelectorAll('.avatarOption').forEach(img => img.classList.remove('selected'));
+    document.querySelectorAll('.avatarOption').forEach(img => {
+      if (img.src.includes(filename)) img.classList.add('selected');
+    });
+    currentAvatarFile = filename;
+  }
+
+  async function closeAvatarPicker() {
+    document.getElementById('avatarPicker').style.display = 'none';
+    if (!currentUserId || !currentAvatarFile) return;
+    await updateDoc(doc(driversRef, currentUserId), {
+      avatarFile: currentAvatarFile
+    });
+  }
+
+  function openAvatarPicker() {
+    // Only allow changing your own avatar
+    if (viewingProfileId !== currentUserId) return;
+    document.getElementById('avatarPicker').style.display = 'flex';
+    // Highlight current selection
+    document.querySelectorAll('.avatarOption').forEach(img => {
+      img.classList.toggle('selected', img.src.includes(currentAvatarFile));
+    });
+  }
+
   // LOGIN
   async function login() {
-    const nameInput = document.getElementById('name');
-    const name = nameInput.value.trim();
+    const name = document.getElementById('nameInput').value.trim();
     if (!name) return;
 
-    // Sign in anonymously to get a real Firebase UID
-    let errorEl = document.getElementById('loginError');
-    if (!errorEl) {
-      errorEl = document.createElement('p');
-      errorEl.id = 'loginError';
-      errorEl.style.cssText = 'color:red;font-size:13px;margin-top:10px;';
-      document.getElementById('login').appendChild(errorEl);
-    }
+    const errorEl = document.getElementById('loginError');
     errorEl.innerText = '';
 
     let userCredential;
@@ -567,29 +747,20 @@
     currentUserId = userCredential.user.uid;
     currentUserName = name;
 
-    // Show app immediately
-    const loginEl = document.getElementById('login');
-const appEl = document.getElementById('app');
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').classList.remove('hidden');
+    setStatus(true);
 
-loginEl.style.display = 'none';
-appEl.style.display = 'block';
-
-// force repaint
-setTimeout(() => {
-  appEl.scrollTop = 0;
-}, 50);
-
-    // Start listeners immediately
     startMessageListener();
     startJobsListener();
     startDriversListener();
     startTypingListener();
 
-    // Write profile in background - non-blocking
     try {
       await setDoc(doc(driversRef, currentUserId), {
         name: currentUserName,
         online: true,
+        avatarFile: currentAvatarFile,
         lastSeen: serverTimestamp()
       }, { merge: true });
 
@@ -601,39 +772,45 @@ setTimeout(() => {
       console.warn('Profile write failed:', e);
     }
 
-    // Handle offline
-    window.addEventListener('beforeunload', async () => {
+    // Mark offline on tab close or background (mobile Safari friendly)
+    const goOffline = async () => {
       try {
-        await updateDoc(doc(presenceRef, currentUserId), {
-          online: false,
-          lastSeen: serverTimestamp()
-        });
-        await updateDoc(doc(driversRef, currentUserId), {
-          online: false,
-          lastSeen: serverTimestamp()
-        });
-      } catch (e) {
-        // ignore
-      }
+        await updateDoc(doc(presenceRef, currentUserId), { online: false, lastSeen: serverTimestamp() });
+        await updateDoc(doc(driversRef, currentUserId), { online: false, lastSeen: serverTimestamp() });
+      } catch (e) {}
+    };
+
+    window.addEventListener('beforeunload', goOffline);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') goOffline();
     });
   }
-let selectedAvatarFile = null;
-let selectedAvatarURL = null;
-  // TABS
+
   function showTab(tab, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('activeTab'));
     el.classList.add('activeTab');
-
     document.getElementById('chat').classList.add('hidden');
     document.getElementById('jobsTab').classList.add('hidden');
     document.getElementById('driversTab').classList.add('hidden');
-
     if (tab === 'chat') document.getElementById('chat').classList.remove('hidden');
     if (tab === 'jobs') document.getElementById('jobsTab').classList.remove('hidden');
     if (tab === 'drivers') document.getElementById('driversTab').classList.remove('hidden');
   }
 
-  // REAL-TIME MESSAGES
+  function makeAvatarEl(avatarFile, name, size = 32) {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:${Math.round(size*0.4)}px;flex-shrink:0;`;
+    if (avatarFile) {
+      const img = document.createElement('img');
+      img.src = avatarURL(avatarFile);
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      wrapper.appendChild(img);
+    } else {
+      wrapper.innerText = (name || 'D')[0].toUpperCase();
+    }
+    return wrapper;
+  }
+
   function startMessageListener() {
     const q = query(messagesRef, orderBy('timestamp', 'asc'));
     onSnapshot(q, (snapshot) => {
@@ -641,29 +818,35 @@ let selectedAvatarURL = null;
       msgArea.innerHTML = '';
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
-        const bubble = document.createElement('div');
         const isMe = data.senderId === currentUserId;
+        const bubble = document.createElement('div');
         bubble.className = 'bubble ' + (isMe ? 'me' : 'them');
 
-        let content = '';
-        if (data.type === 'photo' && data.photoURL) {
-          content = `<img src="${data.photoURL}" style="max-width:100%;border-radius:10px;margin-top:4px;">`;
+        if (isMe) {
+          bubble.innerHTML = `
+            <div class="name">${data.senderName || 'Driver'}</div>
+            <div>${data.text || ''}</div>
+            <div class="meta">${data.timestamp?.toDate ? data.timestamp.toDate().toLocaleTimeString() : ''}</div>
+          `;
         } else {
-          content = data.text || '';
+          const avatarEl = makeAvatarEl(data.avatarFile, data.senderName, 32);
+          const content = document.createElement('div');
+          content.className = 'bubbleContent';
+          content.innerHTML = `
+            <div class="name">${data.senderName || 'Driver'}</div>
+            <div>${data.text || ''}</div>
+            <div class="meta">${data.timestamp?.toDate ? data.timestamp.toDate().toLocaleTimeString() : ''}</div>
+          `;
+          bubble.appendChild(avatarEl);
+          bubble.appendChild(content);
         }
 
-        bubble.innerHTML = `
-          <div class="name">${data.senderName || 'Driver'}</div>
-          <div>${content}</div>
-          <div class="meta">${data.timestamp?.toDate ? data.timestamp.toDate().toLocaleTimeString() : ''}</div>
-        `;
         msgArea.appendChild(bubble);
       });
       msgArea.scrollTop = msgArea.scrollHeight;
     });
   }
 
-  // SEND MESSAGE
   async function sendMessage() {
     const input = document.getElementById('msgInput');
     const text = input.value.trim();
@@ -673,28 +856,25 @@ let selectedAvatarURL = null;
       text,
       senderId: currentUserId,
       senderName: currentUserName || 'Driver',
+      avatarFile: currentAvatarFile,
       type: 'text',
       timestamp: serverTimestamp()
     });
 
     input.value = '';
-    await setDoc(doc(typingRef, currentUserId), { typing: false }, { merge: true });
+    try { await setDoc(doc(typingRef, currentUserId), { typing: false }, { merge: true }); } catch(e) {}
   }
 
-  // TYPING
   async function onTyping() {
     if (!currentUserId) return;
     const typingEl = document.getElementById('typing');
-
-    await setDoc(doc(typingRef, currentUserId), { typing: true }, { merge: true });
-
+    try { await setDoc(doc(typingRef, currentUserId), { typing: true }, { merge: true }); } catch(e) {}
     clearTimeout(typingTimeoutLocal);
     typingTimeoutLocal = setTimeout(async () => {
-      await setDoc(doc(typingRef, currentUserId), { typing: false }, { merge: true });
+      try { await setDoc(doc(typingRef, currentUserId), { typing: false }, { merge: true }); } catch(e) {}
     }, 800);
-
     typingEl.classList.remove('hidden');
-    typingEl.innerText = "You are typing…";
+    typingEl.innerText = LANGS[currentLang].typing;
   }
 
   function startTypingListener() {
@@ -702,75 +882,17 @@ let selectedAvatarURL = null;
       const typingEl = document.getElementById('typing');
       let someoneTyping = false;
       snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        if (data.typing && docSnap.id !== currentUserId) {
-          someoneTyping = true;
-        }
+        if (docSnap.data().typing && docSnap.id !== currentUserId) someoneTyping = true;
       });
       if (someoneTyping) {
         typingEl.classList.remove('hidden');
-        typingEl.innerText = "Someone is typing…";
+        typingEl.innerText = LANGS[currentLang].someoneTyping;
       } else {
         typingEl.classList.add('hidden');
       }
     });
   }
 
-  // CAMERA ATTACH + UPLOAD
-function attachPhoto() {
-  if (!currentUserId) return;
-
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    selectedAvatarFile = file;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      selectedAvatarURL = reader.result;
-
-      document.getElementById('previewImg').src = selectedAvatarURL;
-      document.getElementById('avatarPreview').classList.remove('hidden');
-    };
-
-    reader.readAsDataURL(file);
-  };
-
-  input.click();
-}
-  function cancelPreview() {
-  selectedAvatarFile = null;
-  selectedAvatarURL = null;
-  document.getElementById('avatarPreview').classList.add('hidden');
-}
-
-async function confirmAvatar() {
-  try {
-    if (!selectedAvatarFile || !currentUserId) return;
-
-    const storageRef = ref(storage, `avatars/${currentUserId}.jpg`);
-
-    await uploadBytes(storageRef, selectedAvatarFile);
-
-    const url = await getDownloadURL(storageRef);
-
-    await updateDoc(doc(driversRef, currentUserId), {
-      avatarURL: url
-    });
-
-    cancelPreview();
-
-  } catch (e) {
-    alert("Upload failed: " + e.message);
-  }
-}
-
-  // JOBS
   function startJobsListener() {
     const q = query(jobsRef, orderBy('timestamp', 'desc'));
     onSnapshot(q, (snapshot) => {
@@ -780,10 +902,8 @@ async function confirmAvatar() {
         const data = docSnap.data();
         const card = document.createElement('div');
         card.className = 'jobCard';
-
         const statusText = data.status || 'open';
         const claimedBy = data.claimedBy ? `Claimed by ${data.claimedByName || 'driver'}` : 'Not claimed yet';
-
         card.innerHTML = `
           <div class="jobRoute">${data.route || 'Job'}</div>
           <div class="jobMeta">${data.postedBy || 'Dispatcher'}</div>
@@ -793,10 +913,8 @@ async function confirmAvatar() {
             ${statusText === 'open' ? '<button class="jobBtn primary">Claim</button>' : ''}
           </div>
         `;
-
         if (statusText === 'open') {
-          const btn = card.querySelector('.jobBtn.primary');
-          btn.onclick = async () => {
+          card.querySelector('.jobBtn.primary').onclick = async () => {
             await updateDoc(doc(jobsRef, docSnap.id), {
               status: 'claimed',
               claimedBy: currentUserId,
@@ -804,7 +922,6 @@ async function confirmAvatar() {
             });
           };
         }
-
         jobsEl.appendChild(card);
       });
     });
@@ -812,9 +929,8 @@ async function confirmAvatar() {
 
   async function postJob() {
     if (!currentUserId) return;
-    const route = prompt("Job route / description:");
+    const route = prompt(LANGS[currentLang].jobPrompt);
     if (!route) return;
-
     await addDoc(jobsRef, {
       route,
       postedBy: currentUserName || 'Dispatcher',
@@ -823,7 +939,6 @@ async function confirmAvatar() {
     });
   }
 
-  // DRIVERS
   function startDriversListener() {
     onSnapshot(driversRef, (snapshot) => {
       const driversEl = document.getElementById('drivers');
@@ -833,54 +948,39 @@ async function confirmAvatar() {
         const card = document.createElement('div');
         card.className = 'driverCard';
 
-        const avatar = document.createElement('div');
-avatar.className = 'driverAvatar';
-avatar.dataset.uid = docSnap.id;
-
-const name = data.name || 'Driver';
-
-if (data.avatarURL) {
-  const img = document.createElement('img');
-  img.src = data.avatarURL;
-  img.style.width = '100%';
-  img.style.height = '100%';
-  img.style.borderRadius = '50%';
-  img.style.objectFit = 'cover';
-
-  avatar.innerHTML = '';
-  avatar.appendChild(img);
-} else {
-  avatar.innerText = name[0].toUpperCase();
-}
+        const avatarEl = makeAvatarEl(data.avatarFile, data.name, 40);
 
         const info = document.createElement('div');
         info.className = 'driverInfo';
+        info.innerHTML = `
+          <div class="driverName">${data.name || 'Driver'}</div>
+          <div class="driverStatus">${data.online ? '🟢 Online' : '⚫ Offline'}</div>
+        `;
 
-        const nameEl = document.createElement('div');
-        nameEl.className = 'driverName';
-        nameEl.innerText = data.name || 'Driver';
-
-        const statusEl = document.createElement('div');
-        statusEl.className = 'driverStatus';
-        statusEl.innerText = data.online ? 'Online' : 'Offline';
-
-        info.appendChild(nameEl);
-        info.appendChild(statusEl);
-
-        card.appendChild(avatar);
+        card.appendChild(avatarEl);
         card.appendChild(info);
-
         card.onclick = () => openProfile(docSnap.id, data);
-
         driversEl.appendChild(card);
       });
     });
   }
 
   function openProfile(id, data) {
-    document.getElementById('profileAvatar').innerText = (data.name || 'D')[0].toUpperCase();
+    viewingProfileId = id;
+    const avatarEl = document.getElementById('profileAvatar');
+    avatarEl.innerHTML = '';
+    if (data.avatarFile) {
+      avatarEl.innerHTML = `<img src="${avatarURL(data.avatarFile)}" style="width:100%;height:100%;object-fit:cover;">`;
+    } else {
+      avatarEl.innerText = (data.name || 'D')[0].toUpperCase();
+    }
     document.getElementById('profileName').innerText = data.name || 'Driver';
-    document.getElementById('profileMeta').innerText = data.online ? 'Online' : 'Offline';
+    document.getElementById('profileMeta').innerText = data.online ? '🟢 Online' : '⚫ Offline';
+
+    // Only show Change Avatar button for yourself
+    const changeBtn = document.querySelector('#profileModal .profileCard button:first-of-type');
+    changeBtn.style.display = id === currentUserId ? 'inline-block' : 'none';
+
     document.getElementById('profileModal').style.display = 'flex';
   }
 
@@ -888,105 +988,16 @@ if (data.avatarURL) {
     document.getElementById('profileModal').style.display = 'none';
   }
 
-  // Expose functions for inline handlers
   window.login = login;
+  window.setLang = setLang;
   window.showTab = showTab;
   window.sendMessage = sendMessage;
   window.onTyping = onTyping;
-  window.attachPhoto = attachPhoto;
   window.postJob = postJob;
   window.closeProfile = closeProfile;
-  window.cancelPreview = cancelPreview;
-window.confirmAvatar = async function () {
-  try {
-    alert("set clicked");
-
-    if (!selectedAvatarFile || !currentUserId) {
-
-      alert("missing file or user");
-      return;
-    }
-
-    const file = selectedAvatarFile;
-const uid = currentUserId;
-
-
-    const storageRef = ref(storage, `avatars/${uid}.jpg`);
-
-    await uploadBytes(storageRef, file);
-
-    const url = await getDownloadURL(storageRef);
-
-    await updateDoc(doc(driversRef, uid), {
-      avatarURL: url
-    });
-
-    // FORCE UI update first
-    const el = document.querySelector(`.driverAvatar[data-uid="${uid}"]`);
-    if (el) {
-      el.innerHTML = `<img src="${url}" style="width:100%;height:100%;border-radius:50%;">`;
-    }
-
-    // NOW close overlay
-    cancelPreview();
-
-    alert("done");
-
-  } catch (e) {
-    alert("FAILED: " + e.message);
-    cancelPreview(); // <-- IMPORTANT fallback so overlay NEVER gets stuck
-  }
-};
+  window.openAvatarPicker = openAvatarPicker;
+  window.closeAvatarPicker = closeAvatarPicker;
 </script>
-<div id="avatarPreview" class="hidden">
-  <div style="
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.7);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-  ">
-    <div style="
-      background:white;
-      padding:20px;
-      border-radius:16px;
-      text-align:center;
-      width:80%;
-      max-width:300px;
-    ">
-      <div style="font-weight:bold;margin-bottom:10px;">Set Avatar</div>
 
-      <img id="previewImg" style="
-        width:140px;
-        height:140px;
-        border-radius:50%;
-        object-fit:cover;
-        margin:10px auto;
-        display:block;
-      ">
-
-      <div style="display:flex;gap:10px;margin-top:15px;">
-        <button onclick="cancelPreview()" style="
-          flex:1;
-          padding:10px;
-          border:none;
-          border-radius:10px;
-          background:#ddd;
-        ">Cancel</button>
-
-        <button onclick="confirmAvatar()" style="
-          flex:1;
-          padding:10px;
-          border:none;
-          border-radius:10px;
-          background:#128C7E;
-          color:white;
-        ">Set</button>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
 </html>
