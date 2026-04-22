@@ -641,11 +641,17 @@
       console.warn('Profile write failed:', e);
     }
 
-    window.addEventListener('beforeunload', async () => {
+    // Mark offline on tab close or background (mobile Safari friendly)
+    const goOffline = async () => {
       try {
         await updateDoc(doc(presenceRef, currentUserId), { online: false, lastSeen: serverTimestamp() });
         await updateDoc(doc(driversRef, currentUserId), { online: false, lastSeen: serverTimestamp() });
       } catch (e) {}
+    };
+
+    window.addEventListener('beforeunload', goOffline);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') goOffline();
     });
   }
 
