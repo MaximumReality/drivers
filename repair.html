@@ -956,9 +956,10 @@
 
         const info = document.createElement('div');
         info.className = 'driverInfo';
+        const onlineText = data.online ? '🟢 ' + LANGS[currentLang].online : '⚫ ' + LANGS[currentLang].offline;
         info.innerHTML = `
           <div class="driverName">${data.name || 'Driver'}</div>
-          <div class="driverStatus">${data.online ? '🟢 ' + LANGS[currentLang].online : '⚫ ' + LANGS[currentLang].offline}</div>
+          <div class="driverStatus">${onlineText}</div>
         `;
 
         card.appendChild(avatarEl);
