@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DriverLink</title>
+  <link rel="icon" href="favicon.png">
+
+<style>
+  :root {
+    --bg: #ECE5DD;
+    --panel: #FFFFFF;
+    --panel-light: #F7F7F7;
+    --accent: #25D366;
+    --accent-dark: #128C7E;
+    --text: #111;
+    --text-dim: #555;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, Arial;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  * { box-sizing: inherit; }
+
+  .hidden { display: none; }
+
+  .header {
+    background: var(--accent-dark);
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 30;
+  }
+
+  .header img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    margin-right: 10px;
+  }
+
+  #status {
+    flex-shrink: 1;
+    max-width: 80px;
+    font-size: 14px;
+  }
+
+  .statusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+
+  .online { background: var(--accent); }
+  .offline { background: #ff4d4d; }
+
+  #login {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 30px;
+    z-index: 9999;
+    text-align: center;
+  }
+
+  #login img {
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
+    margin: 0 auto 20px;
+  }
+
+  #login input {
+    padding: 14px;
+    margin-top: 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    width: 100%;
+  }
+
+  #login button {
+    margin-top: 12px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent-dark);
+    color: white;
+    font-size: 16px;
+    width: 100%;
+  }
+
+  .tabs {
+    display: flex;
+    background: var(--panel);
+    position: fixed;
+    top: 58px;
+    width: 100%;
+    z-index: 25;
+  }
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  .activeTab {
+    color: var(--accent-dark);
+    border-bottom: 2px solid var(--accent-dark);
+  }
+
+  #chat, #jobsTab, #driversTab {
+    position: absolute;
+    top: 110px;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px;
+    background: url('wallpaper.PNG');
+    background-size: 280px;
+    background-repeat: repeat;
+  }
+
+  #messages { padding-bottom: 8px; }
+
+  .bubble {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 14px;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    font-size: 15px;
+    position: relative;
+  }
+
+  .bubble.me {
+    background: var(--accent);
+    color: #000;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+    display: block;
+  }
+
+  .bubble.them {
+    background: var(--panel);
+    border-bottom-left-radius: 4px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: 85%;
+  }
+
+  .bubbleAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 13px;
+    color: #000;
+  }
+
+  .bubbleAvatar img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .bubbleContent { flex: 1; }
+
+  .bubble .name {
+    font-weight: bold;
+    color: var(--accent-dark);
+    margin-bottom: 2px;
+    font-size: 13px;
+  }
+
+  .bubble .meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  .typingIndicator {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .inputBar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: var(--panel);
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    z-index: 30;
+  }
+
+  .inputBar input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 20px;
+    border: none;
+    font-size: 15px;
+  }
+
+  .inputBar button {
+    margin-left: 10px;
+    background: var(--accent-dark);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 20px;
+    color: white;
+    font-weight: bold;
+  }
+
+  .jobCard {
+    background: var(--panel);
+    margin: 10px 0;
+    padding: 14px;
+    border-radius: 14px;
+    border-left: 4px solid var(--accent-dark);
+    transition: 0.15s ease;
+  }
+
+  .jobCard:active { transform: scale(0.97); }
+  .jobRoute { font-size: 17px; font-weight: bold; }
+  .jobMeta { font-size: 13px; opacity: 0.7; margin-top: 4px; }
+  .jobStatus { margin-top: 6px; font-size: 13px; }
+  .jobHint { margin-top: 8px; font-size: 11px; opacity: 0.5; }
+
+  .jobActions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .jobBtn {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .jobBtn.primary { background: var(--accent); color: #000; }
+  .jobBtn.secondary { background: var(--panel-light); color: var(--text); }
+
+  .postJobBtn {
+    margin: 10px 0;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent-dark);
+    color: white;
+    font-weight: bold;
+    width: 100%;
+  }
+
+  .driverCard {
+    background: var(--panel);
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .driverAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .driverAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .driverInfo { flex: 1; }
+  .driverName { font-size: 15px; font-weight: 500; }
+  .driverStatus { font-size: 12px; color: var(--text-dim); }
+
+  /* PROFILE MODAL */
+  #profileModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .profileCard {
+    background: var(--panel);
+    padding: 20px;
+    border-radius: 14px;
+    width: 85%;
+    max-width: 340px;
+    text-align: center;
+  }
+
+  .profileAvatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 28px;
+    font-weight: bold;
+    overflow: hidden;
+  }
+
+  .profileAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .profileName { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .profileMeta { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; }
+
+  .profileClose {
+    margin-top: 10px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent-dark);
+    color: white;
+    font-weight: 500;
+  }
+
+  /* AVATAR PICKER */
+  #avatarPicker {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+
+  .avatarPickerCard {
+    background: var(--panel);
+    padding: 20px;
+    border-radius: 16px;
+    width: 88%;
+    max-width: 340px;
+    text-align: center;
+  }
+
+  .avatarPickerTitle {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 14px;
+    color: var(--accent-dark);
+  }
+
+  .avatarGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .avatarOption {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: border 0.15s;
+  }
+
+  .avatarOption.selected {
+    border-color: var(--accent-dark);
+  }
+
+  .avatarPickerClose {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent-dark);
+    color: white;
+    font-weight: bold;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <img src="icon.PNG">
+  <h2 style="color:#128C7E;">DriverLink</h2>
+  <p style="opacity:0.7;">Enter your name to continue</p>
+  <input id="nameInput" placeholder="Your name">
+  <button onclick="login()">Enter Network</button>
+  <p id="loginError" style="color:red;font-size:13px;margin-top:10px;"></p>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+  <div class="header">
+    <div style="display:flex;align-items:center;">
+      <img src="icon.PNG">
+      <span>DriverLink</span>
+    </div>
+    <span id="status"></span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab activeTab" onclick="showTab('chat', this)">Chat</div>
+    <div class="tab" onclick="showTab('jobs', this)">Jobs</div>
+    <div class="tab" onclick="showTab('drivers', this)">Drivers</div>
+  </div>
+
+  <div id="chat">
+    <div id="messages"></div>
+    <div id="typing" class="typingIndicator hidden"></div>
+  </div>
+
+  <div id="jobsTab" class="hidden">
+    <button class="postJobBtn" onclick="postJob()">+ Post Job</button>
+    <div id="jobs"></div>
+  </div>
+
+  <div id="driversTab" class="hidden">
+    <div id="drivers"></div>
+  </div>
+
+  <div class="inputBar">
+    <input id="msgInput" placeholder="Message drivers..." oninput="onTyping()">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profileModal">
+  <div class="profileCard">
+    <div class="profileAvatar" id="profileAvatar"></div>
+    <div class="profileName" id="profileName"></div>
+    <div class="profileMeta" id="profileMeta"></div>
+    <button style="margin-top:8px;padding:8px 14px;border-radius:8px;border:none;background:var(--accent);color:#000;font-weight:500;" onclick="openAvatarPicker()">Change Avatar</button>
+    <button class="profileClose" onclick="closeProfile()">Close</button>
+  </div>
+</div>
+
+<!-- AVATAR PICKER -->
+<div id="avatarPicker">
+  <div class="avatarPickerCard">
+    <div class="avatarPickerTitle">Choose Your Avatar</div>
+    <div class="avatarGrid" id="avatarGrid"></div>
+    <button class="avatarPickerClose" onclick="closeAvatarPicker()">Done</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, onSnapshot,
+    serverTimestamp, query, orderBy, doc, setDoc, updateDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import {
+    getAuth, signInAnonymously
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB6zx5__XRT6R6UnR3EhVjZAx6I8VkIqHM",
+    authDomain: "driver-uplink.firebaseapp.com",
+    projectId: "driver-uplink",
+    storageBucket: "driver-uplink.firebasestorage.app",
+    messagingSenderId: "156011169296",
+    appId: "1:156011169296:web:ed175cf12158e09e14ec95"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  const messagesRef = collection(db, "messages");
+  const jobsRef = collection(db, "jobs");
+  const driversRef = collection(db, "drivers");
+  const presenceRef = collection(db, "presence");
+  const typingRef = collection(db, "typing");
+
+  const AVATARS = [
+    'driver-1.jpg','driver-2.jpg','driver-3.jpg','driver-4.jpg',
+    'driver-5.jpg','driver-6.jpg','driver-7.jpg'
+  ];
+
+  let currentUserId = null;
+  let currentUserName = null;
+  let currentAvatarFile = 'driver-1.jpg';
+  let typingTimeoutLocal = null;
+  let viewingProfileId = null;
+
+  function avatarURL(filename) {
+    if (!filename) return null;
+    return `https://maximumreality.github.io/drivers/${filename}`;
+  }
+
+  function setStatus(isOnline) {
+    const status = document.getElementById('status');
+    status.innerHTML = `<span class="statusDot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}`;
+  }
+
+  // BUILD AVATAR GRID
+  const grid = document.getElementById('avatarGrid');
+  AVATARS.forEach(filename => {
+    const img = document.createElement('img');
+    img.src = avatarURL(filename);
+    img.className = 'avatarOption';
+    img.onclick = () => selectAvatar(filename);
+    grid.appendChild(img);
+  });
+
+  function selectAvatar(filename) {
+    document.querySelectorAll('.avatarOption').forEach(img => img.classList.remove('selected'));
+    document.querySelectorAll('.avatarOption').forEach(img => {
+      if (img.src.includes(filename)) img.classList.add('selected');
+    });
+    currentAvatarFile = filename;
+  }
+
+  async function closeAvatarPicker() {
+    document.getElementById('avatarPicker').style.display = 'none';
+    if (!currentUserId || !currentAvatarFile) return;
+    await updateDoc(doc(driversRef, currentUserId), {
+      avatarFile: currentAvatarFile
+    });
+  }
+
+  function openAvatarPicker() {
+    // Only allow changing your own avatar
+    if (viewingProfileId !== currentUserId) return;
+    document.getElementById('avatarPicker').style.display = 'flex';
+    // Highlight current selection
+    document.querySelectorAll('.avatarOption').forEach(img => {
+      img.classList.toggle('selected', img.src.includes(currentAvatarFile));
+    });
+  }
+
+  // LOGIN
+  async function login() {
+    const name = document.getElementById('nameInput').value.trim();
+    if (!name) return;
+
+    const errorEl = document.getElementById('loginError');
+    errorEl.innerText = '';
+
+    let userCredential;
+    try {
+      userCredential = await signInAnonymously(auth);
+    } catch (e) {
+      errorEl.innerText = '❌ ' + e.message;
+      return;
+    }
+
+    currentUserId = userCredential.user.uid;
+    currentUserName = name;
+
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').classList.remove('hidden');
+    setStatus(true);
+
+    startMessageListener();
+    startJobsListener();
+    startDriversListener();
+    startTypingListener();
+
+    try {
+      await setDoc(doc(driversRef, currentUserId), {
+        name: currentUserName,
+        online: true,
+        avatarFile: currentAvatarFile,
+        lastSeen: serverTimestamp()
+      }, { merge: true });
+
+      await setDoc(doc(presenceRef, currentUserId), {
+        online: true,
+        lastSeen: serverTimestamp()
+      }, { merge: true });
+    } catch(e) {
+      console.warn('Profile write failed:', e);
+    }
+
+    window.addEventListener('beforeunload', async () => {
+      try {
+        await updateDoc(doc(presenceRef, currentUserId), { online: false, lastSeen: serverTimestamp() });
+        await updateDoc(doc(driversRef, currentUserId), { online: false, lastSeen: serverTimestamp() });
+      } catch (e) {}
+    });
+  }
+
+  function showTab(tab, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('activeTab'));
+    el.classList.add('activeTab');
+    document.getElementById('chat').classList.add('hidden');
+    document.getElementById('jobsTab').classList.add('hidden');
+    document.getElementById('driversTab').classList.add('hidden');
+    if (tab === 'chat') document.getElementById('chat').classList.remove('hidden');
+    if (tab === 'jobs') document.getElementById('jobsTab').classList.remove('hidden');
+    if (tab === 'drivers') document.getElementById('driversTab').classList.remove('hidden');
+  }
+
+  function makeAvatarEl(avatarFile, name, size = 32) {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:${Math.round(size*0.4)}px;flex-shrink:0;`;
+    if (avatarFile) {
+      const img = document.createElement('img');
+      img.src = avatarURL(avatarFile);
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      wrapper.appendChild(img);
+    } else {
+      wrapper.innerText = (name || 'D')[0].toUpperCase();
+    }
+    return wrapper;
+  }
+
+  function startMessageListener() {
+    const q = query(messagesRef, orderBy('timestamp', 'asc'));
+    onSnapshot(q, (snapshot) => {
+      const msgArea = document.getElementById('messages');
+      msgArea.innerHTML = '';
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const isMe = data.senderId === currentUserId;
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble ' + (isMe ? 'me' : 'them');
+
+        if (isMe) {
+          bubble.innerHTML = `
+            <div class="name">${data.senderName || 'Driver'}</div>
+            <div>${data.text || ''}</div>
+            <div class="meta">${data.timestamp?.toDate ? data.timestamp.toDate().toLocaleTimeString() : ''}</div>
+          `;
+        } else {
+          const avatarEl = makeAvatarEl(data.avatarFile, data.senderName, 32);
+          const content = document.createElement('div');
+          content.className = 'bubbleContent';
+          content.innerHTML = `
+            <div class="name">${data.senderName || 'Driver'}</div>
+            <div>${data.text || ''}</div>
+            <div class="meta">${data.timestamp?.toDate ? data.timestamp.toDate().toLocaleTimeString() : ''}</div>
+          `;
+          bubble.appendChild(avatarEl);
+          bubble.appendChild(content);
+        }
+
+        msgArea.appendChild(bubble);
+      });
+      msgArea.scrollTop = msgArea.scrollHeight;
+    });
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text || !currentUserId) return;
+
+    await addDoc(messagesRef, {
+      text,
+      senderId: currentUserId,
+      senderName: currentUserName || 'Driver',
+      avatarFile: currentAvatarFile,
+      type: 'text',
+      timestamp: serverTimestamp()
+    });
+
+    input.value = '';
+    try { await setDoc(doc(typingRef, currentUserId), { typing: false }, { merge: true }); } catch(e) {}
+  }
+
+  async function onTyping() {
+    if (!currentUserId) return;
+    const typingEl = document.getElementById('typing');
+    try { await setDoc(doc(typingRef, currentUserId), { typing: true }, { merge: true }); } catch(e) {}
+    clearTimeout(typingTimeoutLocal);
+    typingTimeoutLocal = setTimeout(async () => {
+      try { await setDoc(doc(typingRef, currentUserId), { typing: false }, { merge: true }); } catch(e) {}
+    }, 800);
+    typingEl.classList.remove('hidden');
+    typingEl.innerText = "You are typing…";
+  }
+
+  function startTypingListener() {
+    onSnapshot(typingRef, (snapshot) => {
+      const typingEl = document.getElementById('typing');
+      let someoneTyping = false;
+      snapshot.forEach(docSnap => {
+        if (docSnap.data().typing && docSnap.id !== currentUserId) someoneTyping = true;
+      });
+      if (someoneTyping) {
+        typingEl.classList.remove('hidden');
+        typingEl.innerText = "Someone is typing…";
+      } else {
+        typingEl.classList.add('hidden');
+      }
+    });
+  }
+
+  function startJobsListener() {
+    const q = query(jobsRef, orderBy('timestamp', 'desc'));
+    onSnapshot(q, (snapshot) => {
+      const jobsEl = document.getElementById('jobs');
+      jobsEl.innerHTML = '';
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const card = document.createElement('div');
+        card.className = 'jobCard';
+        const statusText = data.status || 'open';
+        const claimedBy = data.claimedBy ? `Claimed by ${data.claimedByName || 'driver'}` : 'Not claimed yet';
+        card.innerHTML = `
+          <div class="jobRoute">${data.route || 'Job'}</div>
+          <div class="jobMeta">${data.postedBy || 'Dispatcher'}</div>
+          <div class="jobStatus">Status: ${statusText}</div>
+          <div class="jobHint">${claimedBy}</div>
+          <div class="jobActions">
+            ${statusText === 'open' ? '<button class="jobBtn primary">Claim</button>' : ''}
+          </div>
+        `;
+        if (statusText === 'open') {
+          card.querySelector('.jobBtn.primary').onclick = async () => {
+            await updateDoc(doc(jobsRef, docSnap.id), {
+              status: 'claimed',
+              claimedBy: currentUserId,
+              claimedByName: currentUserName || 'Driver'
+            });
+          };
+        }
+        jobsEl.appendChild(card);
+      });
+    });
+  }
+
+  async function postJob() {
+    if (!currentUserId) return;
+    const route = prompt("Job route / description:");
+    if (!route) return;
+    await addDoc(jobsRef, {
+      route,
+      postedBy: currentUserName || 'Dispatcher',
+      status: 'open',
+      timestamp: serverTimestamp()
+    });
+  }
+
+  function startDriversListener() {
+    onSnapshot(driversRef, (snapshot) => {
+      const driversEl = document.getElementById('drivers');
+      driversEl.innerHTML = '';
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const card = document.createElement('div');
+        card.className = 'driverCard';
+
+        const avatarEl = makeAvatarEl(data.avatarFile, data.name, 40);
+
+        const info = document.createElement('div');
+        info.className = 'driverInfo';
+        info.innerHTML = `
+          <div class="driverName">${data.name || 'Driver'}</div>
+          <div class="driverStatus">${data.online ? '🟢 Online' : '⚫ Offline'}</div>
+        `;
+
+        card.appendChild(avatarEl);
+        card.appendChild(info);
+        card.onclick = () => openProfile(docSnap.id, data);
+        driversEl.appendChild(card);
+      });
+    });
+  }
+
+  function openProfile(id, data) {
+    viewingProfileId = id;
+    const avatarEl = document.getElementById('profileAvatar');
+    avatarEl.innerHTML = '';
+    if (data.avatarFile) {
+      avatarEl.innerHTML = `<img src="${avatarURL(data.avatarFile)}" style="width:100%;height:100%;object-fit:cover;">`;
+    } else {
+      avatarEl.innerText = (data.name || 'D')[0].toUpperCase();
+    }
+    document.getElementById('profileName').innerText = data.name || 'Driver';
+    document.getElementById('profileMeta').innerText = data.online ? '🟢 Online' : '⚫ Offline';
+
+    // Only show Change Avatar button for yourself
+    const changeBtn = document.querySelector('#profileModal .profileCard button:first-of-type');
+    changeBtn.style.display = id === currentUserId ? 'inline-block' : 'none';
+
+    document.getElementById('profileModal').style.display = 'flex';
+  }
+
+  function closeProfile() {
+    document.getElementById('profileModal').style.display = 'none';
+  }
+
+  window.login = login;
+  window.showTab = showTab;
+  window.sendMessage = sendMessage;
+  window.onTyping = onTyping;
+  window.postJob = postJob;
+  window.closeProfile = closeProfile;
+  window.openAvatarPicker = openAvatarPicker;
+  window.closeAvatarPicker = closeAvatarPicker;
+</script>
+
+</body>
+</html>
